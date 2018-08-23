@@ -1,0 +1,335 @@
+
+<template name='bodys'>
+  
+
+
+<body>
+  <nav class="light-blue lighten-1" role="navigation">
+    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo"></a>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="#"> {{> loginButtons}}</a></li>
+      </ul>
+
+      <ul id="nav-mobile" class="sidenav">
+        <li><a href="/">Navbar Link</a></li>
+        {{#if currentUser}}
+        <li><a href="/config" id="configuracion">Config</a></li>
+        {{/if}}
+      </ul>
+      <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+    </div>
+  </nav>
+  <div class="section no-pad-bot" id="index-banner">
+
+
+{{#if currentUser}}
+  	{{> Template.dynamic template=index}}
+  {{else}}
+  <h2>plz login</h2>
+  {{/if}}
+
+  <footer class="page-footer orange">
+    <div class="container">
+      <div class="row">
+        <div class="col l6 s12">
+          <h5 class="white-text">Company Bio</h5>
+          <p class="grey-text text-lighten-4">We are a team of college students working on this project like it's our full time job. Any amount would help support and continue development on this project and is greatly appreciated.</p>
+
+
+        </div>
+        <div class="col l3 s12">
+          <h5 class="white-text dropdown-trigger"  data-target='dropdown1'>Settings</h5>
+          <ul id='dropdown1' class='dropdown-content'>
+            <li><a class="white-text" href="#!">Link 1</a></li>
+            <li><a class="white-text" href="#!">Link 2</a></li>
+            <li><a class="white-text" href="#!">Link 3</a></li>
+            <li><a class="white-text" href="#!">Link 4</a></li>
+          </ul>
+        </div>
+        <div class="col l3 s12">
+          <h5 class="white-text dropdown-trigger" href='#' data-target='dropdown2'>Connect</h5>
+          <ul id='dropdown2' class='dropdown-content'>
+            <li><a class="white-text" href="#!">Link 1</a></li>
+            <li><a class="white-text" href="#!">Link 2</a></li>
+            <li><a class="white-text" href="#!">Link 3</a></li>
+            <li><a class="white-text" href="#!">Link 4</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copyright">
+      <div class="container">
+      Made by <a class="orange-text text-lighten-3" href="http://materializecss.com">Materialize</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+  <!--  Scripts-->
+  
+
+  </body>
+  </template>
+
+<template name='principal'>
+  <div class="row">
+      <div class="col s12 m2">
+        
+
+
+        <ul id="nav-mobile" class="sidenav sidenav-fixed" style="transform: translateX(0px);">
+      
+        <li class="no-padding">
+          <ul class="collapsible collapsible-accordion">
+            
+            {{#each zonas}}
+
+                <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-zona="{{_id}}">{{_id}}</a>
+                </li>
+
+            {{/each}}
+
+
+            <!--li class="bold"><a class="collapsible-header waves-effect waves-teal" tabindex="0">Zona 1</a>
+              <div class="collapsible-body">
+                <ul>
+                  <li><a href="color.html">Color</a></li>
+                  <li><a href="grid.html">Grid</a></li>
+                  <li><a href="helpers.html">Helpers</a></li>
+                  <li><a href="media-css.html">Media</a></li>
+                  <li><a href="pulse.html">Pulse</a></li>
+                  <li><a href="sass.html">Sass</a></li>
+                  <li><a href="shadow.html">Shadow</a></li>
+                  <li><a href="table.html">Table</a></li>
+                  <li><a href="css-transitions.html">Transitions</a></li>
+                  <li><a href="typography.html">Typography</a></li>
+                </ul>
+              </div>
+            </li-->
+           
+            
+           
+          </ul>
+        </li>
+       
+      </ul>
+
+
+
+
+
+      </div>
+      <div class="col s12 m10">
+        
+          
+
+  <div class="container">
+    <div class="section">
+
+      <!--   Icon Section   ->
+      <div class="row"-->
+       
+       {{#each dispositivos}}
+       
+             {{#if equals tipo "actuador"}}
+
+  <!-- actuador -->
+   <div class="col s12 m4">
+          <div class="icon-block">
+            <h2 class="center light-blue-text"><i class="medium material-icons">lightbulb_outline</i></h2>
+            <h5 class="center">{{nombre}}</h5>
+                <div class="switch center">
+                  <label>
+                    Off
+                    {{# if equals estado "off"}}
+                    <input type="checkbox" data-id={{_id}} data-zona={{zona}} class="switch" >
+                    {{else}}
+                    <input type="checkbox" data-id={{_id}} data-zona={{zona}} checked class="switch">
+                    {{/if}}
+                    <span class="lever"></span>
+                    On
+                  </label>
+                </div>
+            
+          </div>
+        </div>
+
+  <!-- sensor -->
+{{else}}
+   <div class="col s12 m4">
+          <div class="icon-block">
+            <h2 class="center light-blue-text"><i class=" medium material-icons">wb_sunny</i></h2>
+            <h5 class="center">{{nombre}}  {{_id}}</h5>
+            <h5 class="center">{{valor}} {{unidad}}</h5>
+
+           
+          </div>
+        </div>
+
+{{/if}}
+
+       {{/each}}      
+       
+
+        
+      <!--/div-->
+
+    </div>
+    <br><br>
+
+    
+      </div>
+
+    </div>
+
+  
+  </div>
+  
+</template>
+
+
+<template name="configuracion">
+
+<div class="row">
+      <div class="col s12 m2">
+        <ul id="nav-mobile" class="sidenav sidenav-fixed" style="transform: translateX(0px);">
+      
+        <li class="no-padding">
+          <ul class="collapsible collapsible-accordion">
+           
+
+                <li class="bold config" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-config="config-disp" href="/config/dispositivo">Dispositivos</a>
+                </li>
+                 <li class="bold config" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-config="configpermiso" href="/config/permiso">Permisos</a>
+                </li>
+                 <li class="bold config" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-config="config-auto" href="/config/auto">Automatizacion</a>
+                </li>
+            
+           
+          </ul>
+        </li>
+       
+      </ul>
+
+
+
+
+
+      </div>
+      <div class="col s12 m10">
+        
+          
+
+  <div class="container">
+    <div class="section">
+
+      {{> Template.dynamic template=config_plate}}
+
+        
+    </div>
+    <br><br>
+
+    
+      </div>
+
+    </div>
+
+  
+  </div>
+
+
+
+</template>
+
+<template name="config-disp">
+  <h2>Agregar Dispositivo</h2>
+         <form class="col s12 new-disp" id="new-disp">
+            <div class="row">
+              <div class="input-field col s12">
+              
+                <input type="text" name="nombre" class="validate" id="nombre" required="true" />
+                <label class="light-blue-text " for="nombre">Nombre</label>
+              </div>
+
+                <div class="col s12">
+                  <label  class="light-blue-text">Tipo de Dispositivo</label>
+                  <div class="row">
+                    <div class=" col s6">
+                        <p>
+                          <input id="sensor" name="tipo" type="radio" value="sensor" required="true"/>   
+                          <label for="sensor">Sensor</label>
+                        </p>
+                      </div>
+                      <div class=" col s6">
+                        <p>
+                          <input id="actuador" name="tipo" type="radio" value="actuador" required="true"/>   
+                          <label  for="actuador">Actuador</label>
+                        </p>
+                     </div>
+                   </div>
+                </div>
+               
+               
+                   <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="text" id="zona" class="autocomplete" name="zona" required="true">
+                          <label  class="light-blue-text " for="zona">Zona</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="text" id="pin" class="autocomplete" name="pin" required="true">
+                          <label  class="light-blue-text " for="pin">Pin</label>
+                        </div>
+                      </div>
+                    </div>
+                    <button class="btn waves-effect waves-light light-blue lighten-1" type="submit" name="action">Guardar
+                      <i class="material-icons right">send</i>
+                    </button>
+                       
+
+            </div>
+
+
+
+        </form>
+</template>
+
+<template name="configpermiso">
+  <h2>Permisos</h2>
+  
+  {{#each users}}
+   {{> email}}
+  {{/each}}
+   
+</template>
+
+<template name="config-auto">
+  <h2>Auto</h2>
+
+  
+       
+</template>
+
+<template name="email">
+  {{#each emails}}
+   <label>{{this.address}}</label>
+      {{#each zonas}}
+      <div class=" col s6">
+        <p>
+          <input id="permiso" name="permiso" type="radio" value="permiso" required="true"/>   
+          <label for="sensor">{{_id}}</label>
+        </p>
+      </div>
+     {{/each}}
+
+  {{/each}}
+  
+       
+</template>

@@ -2,8 +2,9 @@ import { Template } from 'meteor/templating';
 import { Dispositivos } from '../api/dispositivos.js';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Session } from 'meteor/session';
-import './body.html';
-
+//import { FlowRouter } from 'meteor/kadira:flow-router';
+import './bodys.html';
+import '../../client/layouts/MainLayout.html';
 
 clientZona = new Mongo.Collection('clientZona');
 
@@ -14,11 +15,12 @@ Template.body.onCreated(function bodyOnCreated() {
 
   Meteor.subscribe('dispositivos');
   Meteor.subscribe('zonas');
+  Meteor.subscribe('user');
 
 });
 
 
-Template.body.helpers({
+Template.principal.helpers({
 
   dispositivos() {
 
@@ -27,14 +29,83 @@ Template.body.helpers({
   },
 
   zonas(){
-  		
+  		//console.log("return zonas");
         return clientZona.find();
-  }
+  },
+  equals: function(a, b) {
+        return a == b;
+    },
+    data: function() {
+        var paramsStatus = Router.current().params._status;
+        return paramsStatus;
+    }
 
 });
 
+
+Template.configuracion.events({
+	/*'click .config':function(event,temp){
+	
+	var a = event.target.getAttribute("data-config");
+	if (a == "null"){
+		Session.set('configuracion',null);
+	}else{
+		Session.set('configuracion',a);
+	
+	}
+	console.log(event.target.getAttribute("data-config") +" tipo config" )
+	
+
+
+},
+*/
+
+
+
+  'submit .new-disp'(event) {
+
+    // Prevent default browser form submit
+
+    event.preventDefault();
+    // Get value from form element
+
+    const target = event.target;
+
+   // const text = target.text.value;
+
+    console.log(target.nombre.value);
+ 	console.log(target.tipo.value);
+ 	console.log(target.zona.value);
+ 	console.log(target.pin.value);
+
+    /*Insert a task into the collection
+
+    Tasks.insert({
+
+      text,
+
+      createdAt: new Date(), // current time
+
+    });
+*/
  
-Template.elemento.events({
+
+    // Clear form
+
+    target.nombre.value = '';
+	document.getElementById("sensor").checked=false;
+	document.getElementById("actuador").checked=false;
+	target.zona.value= '';
+	target.pin.value= '';
+
+  },
+
+});
+
+
+
+ 
+Template.principal.events({
 	'change .switch': function(event) {
   var x = event.target.checked;
   //Session.set("statevalue", x);
@@ -55,22 +126,8 @@ Template.elemento.events({
   //console.log(mensaje)
   //Dispositivos.update({"_id":id},{$set: {"estado":estado,"update":new Date()}});
   Meteor.call('prender', {'ide' : this._id, 'estado' : estado});
- }
+ },
 
-});
-
-
-Template.elemento.helpers({
-    equals: function(a, b) {
-        return a == b;
-    },
-    data: function() {
-        var paramsStatus = Router.current().params._status;
-        return paramsStatus;
-    }
-})
-
-Template.zona.events({
 'click .zona':function(event,temp){
 	//var a = event.target.innerHTML;
 	//alert(a);
@@ -83,10 +140,25 @@ Template.zona.events({
 		Session.set('zona_actual',a);
 	
 	}
-	console.log(event.target.getAttribute("data-zona") +"zona evento" )
+	console.log(event.target.getAttribute("data-zona") +" zona evento" )
 	
 
 
 }
 
+
 });
+
+
+Template.configpermiso.helpers({
+	users(){
+		return Meteor.users.find({});
+	}
+});
+
+Template.email.helpers({
+	 zonas(){
+  		//console.log("return zonas");
+        return clientZona.find();
+  },
+})

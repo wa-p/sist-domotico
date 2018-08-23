@@ -10,7 +10,12 @@
   "dependencies": {
     "@babel/runtime": "7.0.0-beta.55",
     "bcrypt": "^3.0.0",
-    "meteor-node-stubs": "^0.4.1"
+    "bufferutil": "^4.0.0",
+    "meteor-node-stubs": "^0.4.1",
+    "mqtt": "^2.18.3",
+    "simpl-schema": "^1.5.3",
+    "simple-schema": "^1.1.0",
+    "utf-8-validate": "^5.0.1"
   },
   "meteor": {
     "mainModule": {

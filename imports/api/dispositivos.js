@@ -1,4 +1,5 @@
 import { Mongo } from 'meteor/mongo';
+import { Meteor } from 'meteor/meteor';
 import { ReactiveAggregate } from 'meteor/jcbernack:reactive-aggregate';
 
 export const Dispositivos = new Mongo.Collection('dispositivos');
@@ -7,7 +8,18 @@ export const Dispositivos = new Mongo.Collection('dispositivos');
 if (Meteor.isServer) {
 
   // This code only runs on the server
+  var mqtt = require('mqtt'); 
+  //var client = mqtt.connect('mqtt://200.8.81.144:1883');
+  var client = mqtt.connect('mqtt://localhost:1883');
+  client.subscribe('actuador');
+  client.subscribe('sensor');
 
+
+
+  Meteor.publish("user",function usersPublication() {
+  	// body...
+  	return Meteor.users.find();
+  })
 
 
   Meteor.publish("zonas", function() {
@@ -42,13 +54,36 @@ if (Meteor.isServer) {
         	console.log(data);
         	Dispositivos.update({_id:data.ide},{$set: {estado:data.estado,update:new Date()}});
             //client.publish(data.topic, data.message);
+            var mensaje = data.ide+" turn "+data.estado;
+            client.publish('actuador',mensaje);
         },
 
         cambiarValor:function(data) {
-            Equipos.update({nombre:data.message1},{$set:{valor:data.message2}});
+        	//console.log(data.message2);
+            Dispositivos.update({_id:parseInt(data.message1,10)},{$set:{valor:data.message2,update:new Date()}});
         }
 
 
     });
+
+
+client.on('message', Meteor.bindEnvironment(function (topic, message) {
+  	
+  		if (topic.toString()=='sensor'){
+
+		//console.log("en el sensor " + message)
+		var mensaje = message.toString().split(" ");
+
+		Meteor.call('cambiarValor', {'message1' : mensaje[0], 'message2' : mensaje[1]});
+		//console.log("primero  " +mensaje[0] + "  segundo  "+mensaje[1]);
+
+
+};
+
+
+}));
+
+
+
 
 }
