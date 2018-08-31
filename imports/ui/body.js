@@ -1,5 +1,6 @@
 import { Template } from 'meteor/templating';
 import { Dispositivos } from '../api/dispositivos.js';
+import { Permisos } from '../api/dispositivos.js';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Session } from 'meteor/session';
 //import { FlowRouter } from 'meteor/kadira:flow-router';
@@ -16,6 +17,7 @@ Template.body.onCreated(function bodyOnCreated() {
   Meteor.subscribe('dispositivos');
   Meteor.subscribe('zonas');
   Meteor.subscribe('user');
+  Meteor.subscribe('permisos');
 
 });
 
@@ -30,7 +32,9 @@ Template.principal.helpers({
 
   zonas(){
   		//console.log("return zonas");
-        return clientZona.find();
+  		zonas = Permisos.find({usuario:Meteor.userId()}).fetch()[0].zona;
+  		console.log(Permisos.find({usuario:Meteor.userId()}).fetch()[0].zona);
+        return clientZona.find({_id: {$in: zonas}});
   },
   equals: function(a, b) {
         return a == b;
@@ -100,6 +104,7 @@ Template.configuracion.events({
 
   },
 
+  
 });
 
 
@@ -153,12 +158,44 @@ Template.principal.events({
 Template.configpermiso.helpers({
 	users(){
 		return Meteor.users.find({});
-	}
-});
-
-Template.email.helpers({
-	 zonas(){
+	},
+	zonas(){
   		//console.log("return zonas");
         return clientZona.find();
-  },
-})
+    },
+    userEmail(){
+    	return this.emails.address; },
+    permiso: function(a,b){
+    	//si existe
+    	console.log(a+" "+b);
+    	//console.log(Permisos.findOne({usuario:a,zona:b})!=null);
+    	if (Permisos.findOne({usuario:a,zona:b})!=null){
+    		return true;
+    	}else{
+    		return false
+    	}
+    }
+
+});
+
+Template.configpermiso.events({
+	'change .permiso': function(event) {
+  var x = event.target.checked;
+  //Session.set("statevalue", x);
+  //console.log(event.target.checked);
+  var string = event.target.getAttribute("id");
+  var datos = string.split("_");
+  
+
+  if (x==true) {
+  	//mensaje=event.target.id  + " on";
+  	console.log("datos : " +datos[1]+" "+datos[2])
+  } else{
+  	console.log("datos : "+datos[1]+" "+datos[2])
+  }
+  //console.log(mensaje)
+  //Dispositivos.update({"_id":id},{$set: {"estado":estado,"update":new Date()}});
+  Meteor.call('cambiarPermiso', {'id' : datos[2], 'zona' : datos[1]});
+ }
+
+});

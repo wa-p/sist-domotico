@@ -83,7 +83,7 @@
           <ul class="collapsible collapsible-accordion">
             
             {{#each zonas}}
-
+              
                 <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-zona="{{_id}}">{{_id}}</a>
                 </li>
 
@@ -303,10 +303,29 @@
 
 <template name="configpermiso">
   <h2>Permisos</h2>
-  
-  {{#each users}}
-   {{> email}}
-  {{/each}}
+
+  {{#each user in users}}
+  <div class="row">
+    {{#each email in user.emails}}
+     <h5>{{email.address}}</h5>
+        {{#each zona in zonas}}
+        <div class=" col s4">
+          <p>
+            {{#if permiso user._id zona._id}}
+              <input id="permiso_{{zona._id}}_{{user._id}}" name="permiso_{{zona._id}}" type="checkbox" class="filled-in permiso" data-id="{{user._id}}" checked />
+            {{else}}
+              <input id="permiso_{{zona._id}}_{{user._id}}" name="permiso_{{zona._id}}" type="checkbox" class="filled-in permiso" data-id="{{user._id}}" />
+            {{/if}}   
+            <label for="permiso_{{zona._id}}_{{user._id}}">{{zona._id}}</label>
+          </p>
+        </div>
+       {{/each}}
+    {{/each}}
+  </div>
+  {{/each}}  
+
+
+ 
    
 </template>
 
@@ -318,18 +337,18 @@
 </template>
 
 <template name="email">
-  {{#each emails}}
-   <label>{{this.address}}</label>
+  
+   <h5>{{this.emails.address}}</h5>
       {{#each zonas}}
-      <div class=" col s6">
+      <div class=" col s4">
         <p>
-          <input id="permiso" name="permiso" type="radio" value="permiso" required="true"/>   
-          <label for="sensor">{{_id}}</label>
+          <input id="permiso_{{_id}}" name="permiso_{{_id}}" type="checkbox" class="filled-in" />   
+          <label for="permiso_{{_id}}">{{_id}}</label>
         </p>
       </div>
      {{/each}}
 
-  {{/each}}
+  
   
        
 </template>

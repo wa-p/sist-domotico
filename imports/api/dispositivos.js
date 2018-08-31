@@ -3,6 +3,7 @@ import { Meteor } from 'meteor/meteor';
 import { ReactiveAggregate } from 'meteor/jcbernack:reactive-aggregate';
 
 export const Dispositivos = new Mongo.Collection('dispositivos');
+export const Permisos = new Mongo.Collection('permisos');
 
 
 if (Meteor.isServer) {
@@ -19,8 +20,12 @@ if (Meteor.isServer) {
   Meteor.publish("user",function usersPublication() {
   	// body...
   	return Meteor.users.find();
-  })
+  });
 
+  Meteor.publish("permisos",function permisosPublication() {
+    // body...
+    return Permisos.find();
+  });
 
   Meteor.publish("zonas", function() {
     // Remember, ReactiveAggregate doesn't return anything
@@ -61,7 +66,24 @@ if (Meteor.isServer) {
         cambiarValor:function(data) {
         	//console.log(data.message2);
             Dispositivos.update({_id:parseInt(data.message1,10)},{$set:{valor:data.message2,update:new Date()}});
-        }
+        }, 
+
+        cambiarPermiso:function(data){
+            //console.log(data);
+            //no existe
+            if(Permisos.findOne({usuario:data.id,zona:data.zona})==null){
+              //agregar
+              Permisos.update({usuario:data.id},{$addToSet: {zona: data.zona }},{upsert: true});
+            }else{
+              //eliminar  { $pull: { zona:data.zona } }
+              Permisos.update({usuario:data.id},{ $pull: { zona:data.zona } });
+              //Si no tiene permisos, borrar el documento.
+                if (Permisos.findOne({usuario:data.id,zona:{$size:0}})!=null){
+                    Permisos.remove({usuario:data.id});
+                }
+
+            }
+        }        
 
 
     });
