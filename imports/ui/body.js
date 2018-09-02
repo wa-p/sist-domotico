@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
 import { Dispositivos } from '../api/dispositivos.js';
 import { Permisos } from '../api/dispositivos.js';
+import { Admin } from '../api/dispositivos.js';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Session } from 'meteor/session';
 //import { FlowRouter } from 'meteor/kadira:flow-router';
@@ -18,8 +19,23 @@ Template.body.onCreated(function bodyOnCreated() {
   Meteor.subscribe('zonas');
   Meteor.subscribe('user');
   Meteor.subscribe('permisos');
+  Meteor.subscribe('admin');
+
+
 
 });
+
+Template.bodys.helpers({
+	admin: function (a) {
+    	// body...
+    	if (Admin.findOne({usuario:a})!=null){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+})
+
 
 
 Template.principal.helpers({
@@ -167,12 +183,20 @@ Template.configpermiso.helpers({
     	return this.emails.address; },
     permiso: function(a,b){
     	//si existe
-    	console.log(a+" "+b);
+    	//console.log(a+" "+b);
     	//console.log(Permisos.findOne({usuario:a,zona:b})!=null);
     	if (Permisos.findOne({usuario:a,zona:b})!=null){
     		return true;
     	}else{
-    		return false
+    		return false;
+    	}
+    },
+    admin: function (a) {
+    	// body...
+    	if (Admin.findOne({usuario:a})!=null){
+    		return true;
+    	}else{
+    		return false;
     	}
     }
 

@@ -4,6 +4,7 @@ import { ReactiveAggregate } from 'meteor/jcbernack:reactive-aggregate';
 
 export const Dispositivos = new Mongo.Collection('dispositivos');
 export const Permisos = new Mongo.Collection('permisos');
+export const Admin = new Mongo.Collection('admin');
 
 
 if (Meteor.isServer) {
@@ -20,6 +21,12 @@ if (Meteor.isServer) {
   Meteor.publish("user",function usersPublication() {
   	// body...
   	return Meteor.users.find();
+  });
+
+
+  Meteor.publish("admin",function adminPublication() {
+    // body...
+    return Admin.find();
   });
 
   Meteor.publish("permisos",function permisosPublication() {

@@ -7,16 +7,21 @@
   <nav class="light-blue lighten-1" role="navigation">
     <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo"></a>
       <ul class="right hide-on-med-and-down">
-        <li><a href="#"> {{> loginButtons}}</a></li>
+        <li><a href="#"> </a></li>
       </ul>
 
       <ul id="nav-mobile" class="sidenav">
         <li><a href="/">Navbar Link</a></li>
         {{#if currentUser}}
-        <li><a href="/config" id="configuracion">Config</a></li>
+            {{#if admin currentUser._id}}
+            <li><a href="/config" id="configuracion">Config</a></li>
+            {{/if}}
         {{/if}}
+         <li><a href="#"> {{> loginButtons}}</a></li>
       </ul>
       <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+
+     
     </div>
   </nav>
   <div class="section no-pad-bot" id="index-banner">
@@ -66,9 +71,11 @@
 </div>
 
   <!--  Scripts-->
-  
+
 
   </body>
+
+
   </template>
 
 <template name='principal'>
@@ -83,7 +90,7 @@
           <ul class="collapsible collapsible-accordion">
             
             {{#each zonas}}
-              
+
                 <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-zona="{{_id}}">{{_id}}</a>
                 </li>
 
@@ -268,6 +275,15 @@
                      </div>
                    </div>
                 </div>
+
+
+                <div class="input-field col s12">
+                    <label  class="light-blue-text ">Falta el selector del icono</label>      
+            
+                </div>
+            
+
+                
                
                
                    <div class="col s12">
@@ -308,6 +324,20 @@
   <div class="row">
     {{#each email in user.emails}}
      <h5>{{email.address}}</h5>
+
+           <div class=" col s12">
+          <p>
+            {{#if admin user._id }}
+              <input id="admin_{{user._id}}" name="admin_{{user._id}}" type="checkbox" class="filled-in admin" data-id="{{user._id}}" checked />
+            {{else}}
+              <input id="admin_{{user._id}}" name="admin_{{user._id}}" type="checkbox" class="filled-in admin" data-id="{{user._id}}" />
+            {{/if}}   
+            <label for="admin_{{user._id}}">ADMIN</label>
+          </p>
+        </div>        
+
+
+
         {{#each zona in zonas}}
         <div class=" col s4">
           <p>
@@ -322,6 +352,7 @@
        {{/each}}
     {{/each}}
   </div>
+<div class="section"></div>
   {{/each}}  
 
 
