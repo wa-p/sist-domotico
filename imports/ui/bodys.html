@@ -4,17 +4,44 @@
 
 
 <body>
-  <nav class="light-blue lighten-1" role="navigation">
-    <div class="nav-wrapper container"><a id="logo-container" href="#" class="brand-logo"></a>
+
+
+
+
+  <nav class="light-blue lighten-1">
+    <div class="nav-wrapper">
+      <a href="#!" class="brand-logo">Domus <i class="material-icons">blur_on</i></a>
+      <a href="#" data-target="mobile-demo" class="sidenav-trigger right"><i class="material-icons">menu</i></a>
+      <ul class="right hide-on-med-and-down">
+         {{#if currentUser}}
+            <li><a href="/">Controles</a></li>
+            {{#if admin currentUser._id}}
+            <li><a href="/config" id="configuracion">Configuración</a></li>
+            {{/if}}
+        {{/if}}
+         <li><a href="#"> {{> loginButtons}}</a></li>
+      </ul>
+    </div>
+  </nav>
+        
+
+
+
+
+
+  <!--nav class="light-blue lighten-1" role="navigation">
+    <div class="nav-wrapper container">
+      <a id="logo-container" href="#" class="brand-logo"></a>
       <ul class="right hide-on-med-and-down">
         <li><a href="#"> </a></li>
       </ul>
 
       <ul id="nav-mobile" class="sidenav">
-        <li><a href="/">Navbar Link</a></li>
+        
         {{#if currentUser}}
+            <li><a href="/">Controles</a></li>
             {{#if admin currentUser._id}}
-            <li><a href="/config" id="configuracion">Config</a></li>
+            <li><a href="/config" id="configuracion">Configuración</a></li>
             {{/if}}
         {{/if}}
          <li><a href="#"> {{> loginButtons}}</a></li>
@@ -23,26 +50,28 @@
 
      
     </div>
-  </nav>
+  </nav-->
   <div class="section no-pad-bot" id="index-banner">
 
 
 {{#if currentUser}}
   	{{> Template.dynamic template=index}}
   {{else}}
-  <h2>plz login</h2>
+    <div class="container">
+  <img class="materialboxed center" width="100%" src="/images/iot.png">
+  </div>
   {{/if}}
 
   <footer class="page-footer orange">
     <div class="container">
       <div class="row">
-        <div class="col l6 s12">
+        <div class="col s12">
           <h5 class="white-text">Company Bio</h5>
           <p class="grey-text text-lighten-4">We are a team of college students working on this project like it's our full time job. Any amount would help support and continue development on this project and is greatly appreciated.</p>
 
 
         </div>
-        <div class="col l3 s12">
+        <!--div class="col l3 s12">
           <h5 class="white-text dropdown-trigger"  data-target='dropdown1'>Settings</h5>
           <ul id='dropdown1' class='dropdown-content'>
             <li><a class="white-text" href="#!">Link 1</a></li>
@@ -59,7 +88,7 @@
             <li><a class="white-text" href="#!">Link 3</a></li>
             <li><a class="white-text" href="#!">Link 4</a></li>
           </ul>
-        </div>
+        </div-->
       </div>
     </div>
     <div class="footer-copyright">
@@ -73,10 +102,13 @@
   <!--  Scripts-->
 
 
-  </body>
-
+  </body> 
+    
 
   </template>
+
+
+
 
 <template name='principal'>
   <div class="row">
@@ -91,28 +123,13 @@
             
             {{#each zonas}}
 
-                <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-zona="{{_id}}">{{_id}}</a>
+                <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal truncate" tabindex="0" data-zona="{{_id}}">{{_id}}</a>
                 </li>
 
             {{/each}}
 
 
-            <!--li class="bold"><a class="collapsible-header waves-effect waves-teal" tabindex="0">Zona 1</a>
-              <div class="collapsible-body">
-                <ul>
-                  <li><a href="color.html">Color</a></li>
-                  <li><a href="grid.html">Grid</a></li>
-                  <li><a href="helpers.html">Helpers</a></li>
-                  <li><a href="media-css.html">Media</a></li>
-                  <li><a href="pulse.html">Pulse</a></li>
-                  <li><a href="sass.html">Sass</a></li>
-                  <li><a href="shadow.html">Shadow</a></li>
-                  <li><a href="table.html">Table</a></li>
-                  <li><a href="css-transitions.html">Transitions</a></li>
-                  <li><a href="typography.html">Typography</a></li>
-                </ul>
-              </div>
-            </li-->
+           
            
             
            
@@ -143,7 +160,7 @@
   <!-- actuador -->
    <div class="col s12 m4">
           <div class="icon-block">
-            <h2 class="center light-blue-text"><i class="medium material-icons">lightbulb_outline</i></h2>
+            <h2 class="center light-blue-text"><i class="medium material-icons">{{icono}}</i></h2>
             <h5 class="center">{{nombre}}</h5>
                 <div class="switch center">
                   <label>
@@ -165,8 +182,8 @@
 {{else}}
    <div class="col s12 m4">
           <div class="icon-block">
-            <h2 class="center light-blue-text"><i class=" medium material-icons">wb_sunny</i></h2>
-            <h5 class="center">{{nombre}}  {{_id}}</h5>
+            <h2 class="center light-blue-text"><i class=" medium material-icons">{{icono}}</i></h2>
+            <h5 class="center">{{nombre}} </h5>
             <h5 class="center">{{valor}} {{unidad}}</h5>
 
            
@@ -248,8 +265,88 @@
 
 </template>
 
-<template name="config-disp">
-  <h2>Agregar Dispositivo</h2>
+<template name="configdisp">
+
+  <div class="row">
+    <div class="col s4 l2">
+      <a class="btn-floating btn-large waves-effect waves-light orange modal-trigger pulse tooltipped" data-position="bottom" data-tooltip="Presione para agregar un nuevo dispositivo" href="#modal1"><i class="material-icons">add</i></a>   
+      <a class="modal-trigger" href="#modal2" id="boton_modal_editar" hidden ></a>
+    </div>
+    <DIV CLASS="col s8 l10">
+        <h5>Agregar Dispositivo</h5>   
+    </DIV>
+  </div>
+
+  <div class="divider"></div>
+  <br>
+
+  <h5>Lista de dispositivos</h5>
+  <br>
+   
+   
+  
+
+
+
+
+  <ul class="collapsible">
+
+    {{#each zona in zonas}}
+    <li class="zonaconfig">
+      <div class="collapsible-header"><i class="material-icons">blur_on</i><b>{{zona._id}}</b></div>
+      <div class="collapsible-body">
+        
+
+
+              <ul class="collection">
+                {{#each disp in dispositivos}}
+                  {{#if equals disp.zona zona._id}}
+
+                    <li class="collection-item avatar" id="configdisp_{{disp._id}}">
+                      <i class="material-icons circle" style="left:0px;" >{{disp.icono}}</i>
+                      <span class="title" style="left:-5px;"><b>{{disp.nombre}}</b></span>
+                       <p><b>Tipo:</b> {{disp.tipo}} <br>
+                       {{#if equals disp.tipo "actuador"}}
+                          <b>Estado actual:</b> {{disp.estado}} <br>
+                         
+
+                        
+                        {{else}}
+                          <b>Valor actual:</b> {{disp.valor}} <br>
+                          <b>Unidad:</b> {{disp.unidad}}<br>
+                        
+                        {{/if}}
+                           <b>Pin:</b> {{disp.pin}} <br>
+                          </p>
+                      <p>
+                      <a href="#" class=" editar right"><i class="material-icons" style="color:#ff9800" data-id="{{disp._id}}">mode_edit</i></a>
+                      <a href="#!" class=" eliminar right" style="top:54px; right:16px; color:#ff9800" ><i class="material-icons" data-id="{{disp._id}}">delete</i></a>
+                      </p>
+                    </li>
+                  {{/if}}
+                {{/each}}
+                
+              </ul>
+                        
+
+
+
+
+      </div>
+    </li>
+
+    {{/each}}
+    
+  </ul>
+        
+
+<!-- MODAL DE AGREGAR DISPOSITIVOS -->
+
+
+  <div id="modal1" class="modal" style="max-height: 100%">
+    <div class="modal-content">
+      
+      <h4>Agregar Dispositivo</h4>
          <form class="col s12 new-disp" id="new-disp">
             <div class="row">
               <div class="input-field col s12">
@@ -276,11 +373,35 @@
                    </div>
                 </div>
 
+             
 
-                <div class="input-field col s12">
-                    <label  class="light-blue-text ">Falta el selector del icono</label>      
-            
-                </div>
+                  <div class="input-field col s12">
+                
+                    <select class="icons" name="icono" id="icono">
+                      <option value="" disabled selected>Seleccione un ícono</option>
+                      <option  class="light-blue-text" value="ac_unit" data-icon="/images/ac_unit.png"  >ac_unit</option>
+                      <option value="power_settings" data-icon="/images/power_settings.png">power_settings</option>
+                      <option value="beach_access" data-icon="/images/beach_access.png">beach_access</option>
+                      <option value="camera" data-icon="/images/camera.png">camera</option>
+                      <option value="cloud" data-icon="/images/cloud.png">cloud</option>
+                      <option value="flare" data-icon="/images/flare.png">flare</option>
+                      <option value="invert_colors" data-icon="/images/invert_colors.png">invert_colors</option>
+                      <option value="directions_car" data-icon="/images/directions_car.png">directions_car</option>
+                      <option value="power" data-icon="/images/power.png">power</option>
+                      <option value="remove_red_eye" data-icon="/images/remove_red_eye.png">remove_red_eye</option>
+                      <option value="security" data-icon="/images/security.png">security</option>
+                      <option value="toys" data-icon="/images/toys.png">toys</option>
+                      <option value="lock" data-icon="/images/lock.png">lock</option>
+                      <option value="brightness_low" data-icon="/images/brightness_low.png">brightness_low</option>
+                      <option value="whatshot" data-icon="/images/whatshot.png">whatshot</option>
+                      <!--option value="" data-icon="/images/.png"></option-->
+                     
+
+                    </select>
+                    <label class="light-blue-text ">Ícono</label>
+                  
+                  </div>
+                    
             
 
                 
@@ -305,9 +426,7 @@
                         </div>
                       </div>
                     </div>
-                    <button class="btn waves-effect waves-light light-blue lighten-1" type="submit" name="action">Guardar
-                      <i class="material-icons right">send</i>
-                    </button>
+                   
                        
 
             </div>
@@ -315,6 +434,135 @@
 
 
         </form>
+
+
+    </div>
+    <div class="modal-footer">
+       <button class="btn waves-effect waves-light light-blue lighten-1" type="submit" name="action" form="new-disp">Guardar
+                      <i class="material-icons right">send</i>
+        </button>
+        <br>
+        <br>
+        <br>
+    </div>
+  </div>
+
+    <!-- FIN MODAL AGREGAR DISPOSITIIVOS -->
+
+                <!-- MODAL EDITAR DISPOSITIVOS -->
+
+
+
+                <div id="modal2" class="modal" style="max-height: 100%">
+    <div class="modal-content">
+      
+      <h4>Editar Dispositivo</h4>
+         <form class="col s12 edit-disp" id="edit-disp">
+            <div class="row">
+              <div class="input-field col s12">
+              
+                <input type="text" name="nombre" class="validate" id="edit_nombre" required="true" />
+                <label class="light-blue-text " for="edit_nombre">Nombre</label>
+              </div>
+
+                <div class="col s12">
+                  <label  class="light-blue-text">Tipo de Dispositivo</label>
+                  <div class="row">
+                    <div class=" col s6">
+                        <p>
+                          <input id="edit_sensor" name="tipo" type="radio" value="sensor" required="true"/>   
+                          <label for="edit_sensor">Sensor</label>
+                        </p>
+                      </div>
+                      <div class=" col s6">
+                        <p>
+                          <input id="edit_actuador" name="tipo" type="radio" value="actuador" required="true"/>   
+                          <label  for="edit_actuador">Actuador</label>
+                        </p>
+                     </div>
+                   </div>
+                </div>
+
+             
+
+                  <div class="input-field col s12">
+                
+                    <select class="icons" name="icono" id="edit_icono">
+                      <option value="" disabled selected>Seleccione un ícono</option>
+                      <option  class="light-blue-text" value="ac_unit" data-icon="/images/ac_unit.png"  >ac_unit</option>
+                      <option value="power_settings" data-icon="/images/power_settings.png">power_settings</option>
+                      <option value="beach_access" data-icon="/images/beach_access.png">beach_access</option>
+                      <option value="camera" data-icon="/images/camera.png">camera</option>
+                      <option value="cloud" data-icon="/images/cloud.png">cloud</option>
+                      <option value="flare" data-icon="/images/flare.png">flare</option>
+                      <option value="invert_colors" data-icon="/images/invert_colors.png">invert_colors</option>
+                      <option value="directions_car" data-icon="/images/directions_car.png">directions_car</option>
+                      <option value="power" data-icon="/images/power.png">power</option>
+                      <option value="remove_red_eye" data-icon="/images/remove_red_eye.png">remove_red_eye</option>
+                      <option value="security" data-icon="/images/security.png">security</option>
+                      <option value="toys" data-icon="/images/toys.png">toys</option>
+                      <option value="lock" data-icon="/images/lock.png">lock</option>
+                      <option value="brightness_low" data-icon="/images/brightness_low.png">brightness_low</option>
+                      <option value="whatshot" data-icon="/images/whatshot.png">whatshot</option>
+                      <!--option value="" data-icon="/images/.png"></option-->
+                     
+
+                    </select>
+                    <label class="light-blue-text ">Ícono</label>
+                  
+                  </div>
+                    
+            
+
+                
+               
+               
+                   <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="text" id="edit_zona" class="autocomplete" name="zona" required="true">
+                          <label  class="light-blue-text " for="edit_zona">Zona</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          <input type="text" name="id" hidden id="edit_id">
+                          
+                          <input type="text" id="edit_pin" class="autocomplete" name="pin" required="true">
+                          <label  class="light-blue-text " for="pin">Pin</label>
+                        </div>
+                      </div>
+                    </div>
+                   
+                       
+
+            </div>
+
+
+
+        </form>
+
+
+    </div>
+    <div class="modal-footer">
+       <button class="btn waves-effect waves-light light-blue lighten-1" type="submit" name="action" form="edit-disp">Actualizar
+                      <i class="material-icons right">send</i>
+        </button>
+        <br>
+        <br>
+        <br>
+    </div>
+  </div>
+                  
+
+                <!-- FIN MODAL EDITAR DISPOSITIVOS -->
+
+
+  
 </template>
 
 <template name="configpermiso">
@@ -332,7 +580,7 @@
             {{else}}
               <input id="admin_{{user._id}}" name="admin_{{user._id}}" type="checkbox" class="filled-in admin" data-id="{{user._id}}" />
             {{/if}}   
-            <label for="admin_{{user._id}}">ADMIN</label>
+            <label for="admin_{{user._id}}">Administrador</label>
           </p>
         </div>        
 
@@ -352,7 +600,7 @@
        {{/each}}
     {{/each}}
   </div>
-<div class="section"></div>
+<div class="divider"></div>
   {{/each}}  
 
 
@@ -360,7 +608,7 @@
    
 </template>
 
-<template name="config-auto">
+<template name="configauto">
   <h2>Auto</h2>
 
   

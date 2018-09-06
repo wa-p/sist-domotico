@@ -15,6 +15,7 @@ Template.body.onCreated(function bodyOnCreated() {
   this.state = new ReactiveDict();
   Session.set('zona_actual',null)
 
+
   Meteor.subscribe('dispositivos');
   Meteor.subscribe('zonas');
   Meteor.subscribe('user');
@@ -36,6 +37,14 @@ Template.bodys.helpers({
     }
 })
 
+ Template.bodys.onRendered(function () {
+        
+        $('.collapsible').collapsible();
+        $('.sidenav').sidenav();
+        
+      });
+
+
 
 
 Template.principal.helpers({
@@ -49,7 +58,7 @@ Template.principal.helpers({
   zonas(){
   		//console.log("return zonas");
   		zonas = Permisos.find({usuario:Meteor.userId()}).fetch()[0].zona;
-  		console.log(Permisos.find({usuario:Meteor.userId()}).fetch()[0].zona);
+  		//console.log(Permisos.find({usuario:Meteor.userId()}).fetch()[0].zona);
         return clientZona.find({_id: {$in: zonas}});
   },
   equals: function(a, b) {
@@ -64,25 +73,11 @@ Template.principal.helpers({
 
 
 Template.configuracion.events({
-	/*'click .config':function(event,temp){
-	
-	var a = event.target.getAttribute("data-config");
-	if (a == "null"){
-		Session.set('configuracion',null);
-	}else{
-		Session.set('configuracion',a);
-	
-	}
-	console.log(event.target.getAttribute("data-config") +" tipo config" )
 	
 
 
-},
-*/
-
-
-
-  'submit .new-disp'(event) {
+	//SUBMIT DEL FORMULARIO DE NUEVOS DISPOSITIVOS
+  'submit #new-disp'(event) {
 
     // Prevent default browser form submit
 
@@ -91,34 +86,87 @@ Template.configuracion.events({
 
     const target = event.target;
 
-   // const text = target.text.value;
 
-    console.log(target.nombre.value);
- 	console.log(target.tipo.value);
- 	console.log(target.zona.value);
- 	console.log(target.pin.value);
+	Meteor.call('newdisp',{ "nombre":target.nombre.value,
+							"zona":target.zona.value,
+							"tipo":target.tipo.value,		   
+							"icono":target.icono.value,
+							"pin":target.pin.value,
+							"valor":0,
+		   					"unidad":"unidades", 
+							});
 
-    /*Insert a task into the collection
+	
+		$('.modal').modal('close', "#modal1");
+   	Materialize.toast('Agregado satisfactoriamente');
 
-    Tasks.insert({
-
-      text,
-
-      createdAt: new Date(), // current time
-
-    });
-*/
+		setTimeout(
+			  function() 
+			  {
+			     $('.toast').hide();
+			 
+			  }, 3000);
  
 
     // Clear form
 
-    target.nombre.value = '';
-	document.getElementById("sensor").checked=false;
-	document.getElementById("actuador").checked=false;
-	target.zona.value= '';
-	target.pin.value= '';
+    
+	$("#new-disp").trigger("reset");
 
+	
+	
   },
+
+//SUBMIT DEL FORMULARIO DE NUEVOS DISPOSITIVOS
+   'submit #edit-disp'(event) {
+
+    // Prevent default browser form submit
+
+    event.preventDefault();
+    // Get value from form element
+
+    const target = event.target;
+
+   
+   	
+
+    
+	Meteor.call('editdisp',{"id":target.id.value,
+							"nombre":target.nombre.value,
+							"zona":target.zona.value,
+							"tipo":target.tipo.value,		   
+							"icono":target.icono.value,
+							"pin":target.pin.value
+							
+		   					, 
+							});
+
+	$('.modal').modal('close', "#modal2");
+
+	$('#edit-disp').trigger("reset");
+
+   	Materialize.toast('Editado satisfactoriamente');
+
+		setTimeout(
+			  function() 
+			  {
+			     $('.toast').hide();
+			 
+			  }, 3000);
+ 
+
+    // Clear form
+
+    
+	//document.getElementById("new-disp").reset();
+	
+
+
+	}
+
+
+
+
 
   
 });
@@ -161,7 +209,10 @@ Template.principal.events({
 		Session.set('zona_actual',a);
 	
 	}
-	console.log(event.target.getAttribute("data-zona") +" zona evento" )
+			console.log(event.target);
+			$('a').removeClass("active");
+            $(event.target).addClass("active");
+	//console.log(event.target.getAttribute("data-zona") +" zona evento" )
 	
 
 
@@ -205,21 +256,104 @@ Template.configpermiso.helpers({
 Template.configpermiso.events({
 	'change .permiso': function(event) {
   var x = event.target.checked;
-  //Session.set("statevalue", x);
-  //console.log(event.target.checked);
+  
   var string = event.target.getAttribute("id");
   var datos = string.split("_");
   
 
-  if (x==true) {
-  	//mensaje=event.target.id  + " on";
-  	console.log("datos : " +datos[1]+" "+datos[2])
-  } else{
-  	console.log("datos : "+datos[1]+" "+datos[2])
-  }
-  //console.log(mensaje)
-  //Dispositivos.update({"_id":id},{$set: {"estado":estado,"update":new Date()}});
+  
   Meteor.call('cambiarPermiso', {'id' : datos[2], 'zona' : datos[1]});
+ },
+
+ 'change .admin': function(event) {
+  var x = event.target.checked;
+  
+  var string = event.target.getAttribute("id");
+  var datos = string.split("_");
+  
+
+  Meteor.call('cambiarAdmin', {'id' : datos[1]});
  }
 
+
 });
+
+ Template.configdisp.onRendered(function () {
+        $('select').material_select();
+        $('.modal').modal();
+        $('.collapsible').collapsible();
+        $('.tooltipped').tooltip();
+      });
+
+
+Template.configdisp.helpers({
+	 dispositivos() {
+
+    return Dispositivos.find({});
+
+  },
+
+  zonas(){
+  		
+  		/*zonas = Permisos.find({usuario:Meteor.userId()}).fetch()[0].zona;
+  		
+        return clientZona.find({_id: {$in: zonas}});
+    */
+    	return clientZona.find();	
+        },
+
+    equals: function(a, b) {
+        return a == b;
+    },
+
+});
+
+
+Template.configdisp.events({
+
+	//ELIMINAR DISPOSITIVO
+	'click .eliminar':function(event){
+		
+		var a = event.target.getAttribute("data-id");
+		
+		Meteor.call('eliminar',{id:a});
+		document.getElementById("configdisp_"+a).remove();
+		Materialize.toast('Eliminado satisfactoriamente');
+
+		setTimeout(
+			  function() 
+			  {
+			     $('.toast').hide();
+			 
+			  }, 3000);
+	},
+
+	//MODIFICAR DISPOSITIVO
+	'click .editar':function(event){
+		
+		var a = event.target.getAttribute("data-id");
+		console.log(a);
+		var dsp = Dispositivos.findOne({_id:a});
+		$('#edit_nombre').val(dsp.nombre);
+		$('#edit_nombre').siblings('label, .prefix').addClass('active');
+		$('#edit_zona').val(dsp.zona);
+		$('#edit_zona').siblings('label, .prefix').addClass('active');
+		$('#edit_pin').val(dsp.pin);
+		$('#edit_pin').siblings('label, .prefix').addClass('active');
+		$("#edit_id").val(dsp._id);
+		$("#edit_icono").val(dsp.icono).trigger("change");
+		$("#edit_icono").material_select()
+		if (dsp.tipo=="sensor") {
+			$('#edit_sensor').prop("checked", true);
+		} else {
+			$('#edit_actuador').prop("checked", true);
+		}
+
+		$('#boton_modal_editar')[0].click();
+		
+		
+	},
+
+})
+
+ 

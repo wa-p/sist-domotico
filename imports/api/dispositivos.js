@@ -5,6 +5,7 @@ import { ReactiveAggregate } from 'meteor/jcbernack:reactive-aggregate';
 export const Dispositivos = new Mongo.Collection('dispositivos');
 export const Permisos = new Mongo.Collection('permisos');
 export const Admin = new Mongo.Collection('admin');
+Contador = new Mongo.Collection('contadorDispositivo');
 
 
 if (Meteor.isServer) {
@@ -62,6 +63,8 @@ if (Meteor.isServer) {
 
 
    Meteor.methods({
+
+        //CONTROLAR FUNCIONES DE ACTUADOR
         prender:function(data) {
         	console.log(data);
         	Dispositivos.update({_id:data.ide},{$set: {estado:data.estado,update:new Date()}});
@@ -70,32 +73,132 @@ if (Meteor.isServer) {
             client.publish('actuador',mensaje);
         },
 
+
+
+        //ACTUALIZAR ESTADO DE SENSOR
         cambiarValor:function(data) {
         	//console.log(data.message2);
-            Dispositivos.update({_id:parseInt(data.message1,10)},{$set:{valor:data.message2,update:new Date()}});
+            Dispositivos.update({_id:data.message1},{$set:{valor:data.message2,update:new Date()}});
         }, 
 
+
+
+        //MODIFICAR PERMISOS DE USUARIOS
         cambiarPermiso:function(data){
             //console.log(data);
-            //no existe
+            //NO EXISTE EL PERMISO
             if(Permisos.findOne({usuario:data.id,zona:data.zona})==null){
-              //agregar
+              //AGREGAR UN PERMISO
               Permisos.update({usuario:data.id},{$addToSet: {zona: data.zona }},{upsert: true});
             }else{
-              //eliminar  { $pull: { zona:data.zona } }
+              //ELIMINAR UN PERMISO
               Permisos.update({usuario:data.id},{ $pull: { zona:data.zona } });
-              //Si no tiene permisos, borrar el documento.
+              //SI NO TIENE PERMISOS BORRAR EL DOCUMENTO
                 if (Permisos.findOne({usuario:data.id,zona:{$size:0}})!=null){
                     Permisos.remove({usuario:data.id});
                 }
 
             }
+        } ,
+
+
+
+        //MODIFICAR PERMISO DE ADMINISTRADOR
+        cambiarAdmin:function(data){
+            //console.log(data);
+            //no existe
+            if(Admin.findOne({usuario:data.id})==null){
+              //agregar
+              Admin.insert({usuario:data.id});
+            }else{
+              //eliminar  { $pull: { zona:data.zona } }
+              Admin.remove({usuario:data.id});
+
+            }
+        },
+
+
+        //AGREGAR NUEVO DISPOSITIVO
+        newdisp:function(d){
+         
+
+
+          if (d.tipo=="sensor") {
+              Dispositivos.insert({
+                                   "nombre":d.nombre,
+                                   "zona":d.zona,
+                                   "tipo":d.tipo,
+                                   "valor":0,
+                                   "unidad":"unidades",
+                                   "update":new Date(),
+                                   "icono":d.icono,
+                                   "pin":d.pin
+                                 })
+          }else{
+
+             Dispositivos.insert({
+                                   "nombre":d.nombre,
+                                   "zona":d.zona,
+                                   "tipo":d.tipo,
+                                   "estado":"off",                                   
+                                   "update":new Date(),
+                                   "icono":d.icono,
+                                   "pin":d.pin
+                                 })
+
+          }
+
+
+          //HACER LLAMADA A FUNCION DE ACTUALIZAR DATOS EN RPI
+
+
+        },
+        editdisp:function(d){
+          //console.log(getNextID("productid"));
+
+
+          
+              Dispositivos.update({_id:d.id},
+                                    {$set:{
+                                       "nombre":d.nombre,
+                                       "zona":d.zona,
+                                       "tipo":d.tipo,
+                                       "valor":0,
+                                       "unidad":"unidades",
+                                       "update":new Date(),
+                                       "icono":d.icono,
+                                       "pin":d.pin
+                                      }
+                                  });
+        
+             //HACER LLAMADA A FUNCION DE ACTUALIZAR DATOS EN RPI
+
+          
+
+        },
+
+        //ELIMINAR DISPOSITIVO
+        eliminar:function(d){
+          
+          var a = Dispositivos.findOne({_id:d.id}).zona;
+          console.log("zona a eliminar: "+a);
+          Dispositivos.remove({_id:d.id});
+          
+          //VERIFICAR QUE AUN QUEDAN DISPOSITIVOS
+          if (Dispositivos.findOne({zona:a}) == null) {
+              console.log("entre al nulo");
+              //ELIMINAR TODOS LOS PERMISOS
+              Permisos.update({},{ $pull: { zona:a} },{ upsert: false, multi: true });
+          }
+
         }        
+
 
 
     });
 
 
+//RECEPCION DE MENSAJE POR MQTT
 client.on('message', Meteor.bindEnvironment(function (topic, message) {
   	
   		if (topic.toString()=='sensor'){
@@ -112,7 +215,16 @@ client.on('message', Meteor.bindEnvironment(function (topic, message) {
 
 }));
 
+function getNextID(sec){
+
+    Contador.update({_id: sec },{$inc:{secuencia:1}});
+    var s = Contador.findOne({_id: sec });
+    
+    return s.secuencia.toString();
+}
+
 
 
 
 }
+
