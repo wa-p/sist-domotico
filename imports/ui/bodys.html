@@ -1,6 +1,5 @@
 
 <template name='bodys'>
-  
 
 
 <body>
@@ -8,7 +7,7 @@
 
 
 
-  <nav class="light-blue lighten-1">
+  <!--nav class="light-blue lighten-1">
     <div class="nav-wrapper">
       <a href="#!" class="brand-logo">Domus <i class="material-icons">blur_on</i></a>
       <a href="#" data-target="mobile-demo" class="sidenav-trigger right"><i class="material-icons">menu</i></a>
@@ -22,8 +21,47 @@
          <li><a href="#"> {{> loginButtons}}</a></li>
       </ul>
     </div>
+  </nav-->
+
+
+  <nav class="lighten-1 light-blue">
+    <div class="nav-wrappera">
+      <a href="#!" class="brand-logo">Domus <i class="material-icons">blur_on</i></a>
+       <a href="#" data-activates="slide-out" class="button-collapse hide-on-med-and-up"><i class="material-icons">menu</i></a>
+         <ul  class="right hide-on-small-only">
+          {{#if currentUser}}
+            <li><a href="/">Controles</a></li>
+            {{#if admin currentUser._id}}
+            <li><a href="/config" id="configuracion">Configuración</a></li>
+            {{/if}}
+        {{/if}}
+         <li><a href="#"> {{> loginButtons align="right"}}</a></li>
+       </ul>
+     
+       
+      
+    </div>
+
   </nav>
-        
+ 
+ <ul id="slide-out" class="side-nav">
+          {{#if currentUser}}
+            <li><a href="/">Controles</a></li>
+            {{#if admin currentUser._id}}
+            <li><a href="/config" id="configuracion">Configuración</a></li>
+            {{/if}}
+        {{/if}}
+         <li><a href="#">  {{> loginButtons align="left"}}</a> </li>
+       </ul>
+ 
+
+
+    
+<script type="text/javascript">
+  $(".button-collapse").sideNav();
+</script>
+
+
 
 
 

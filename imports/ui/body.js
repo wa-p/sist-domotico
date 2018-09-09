@@ -24,7 +24,9 @@ Template.body.onCreated(function bodyOnCreated() {
 
 
 
+
 });
+
 
 Template.bodys.helpers({
 	admin: function (a) {
@@ -41,6 +43,7 @@ Template.bodys.helpers({
         
         $('.collapsible').collapsible();
         $('.sidenav').sidenav();
+        
         
       });
 
