@@ -44,14 +44,17 @@
 
   </nav>
  
- <ul id="slide-out" class="side-nav">
+ <ul id="slide-out" class="side-nav show-on-small">
           {{#if currentUser}}
-            <li><a href="/">Controles</a></li>
+            <li><a href="/">Controles </a></li>
             {{#if admin currentUser._id}}
-            <li><a href="/config" id="configuracion">Configuración</a></li>
+            <li><a href="/config" id="configuracion">Configuración <i class="material-icons">settings</i></a></li>
             {{/if}}
+
+     
+         
         {{/if}}
-         <li><a href="#">  {{> loginButtons align="left"}}</a> </li>
+         {{> login}}
        </ul>
  
 
@@ -142,6 +145,38 @@
 
   </body> 
     
+
+  </template>
+
+  <template name="login">
+                  {{#if currentUser}}
+                  <div class="divider"></div>
+                  <li><a href="#" class="logout">Logout <i class="material-icons">power_settings_new</i></a></li>
+                     
+                    {{else}}
+                      <form class="login-form center">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3>Login</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email"  class="form-control" id="email" placeholder="Email address">
+                                </div>
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="password" class="form-control" id="password" placeholder="password">
+                                </div>
+                            </div>
+                            <div class="panel-footer">
+                                <button type="submit" class="btn btn-danger btn-lg">Login</button>
+                            </div>
+                        </div>
+                    </form>
+                    {{/if}}
+
+                  
 
   </template>
 

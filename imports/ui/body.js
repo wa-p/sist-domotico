@@ -45,8 +45,33 @@ Template.bodys.helpers({
         $('.sidenav').sidenav();
         
         
-      });
+      }); 
 
+
+Template.login.events({
+    'submit .login-form': function(e) {
+        e.preventDefault();
+        var email = e.target.email.value;
+        var password = e.target.password.value;
+      Meteor.loginWithPassword(email, password,function(error){
+            if(error) {
+                //do something if error occurred or 
+            }else{
+               //FlowRouter.go('/');
+               $(".login-form").hide();
+            }
+        });
+     },
+      'click .logout': function(e) {
+        Meteor.logout();
+
+       FlowRouter.go('/');
+       $(".sidenav").toggle();
+     }
+
+
+
+ });
 
 
 
