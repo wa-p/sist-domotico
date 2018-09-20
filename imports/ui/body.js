@@ -10,6 +10,14 @@ import '../../client/layouts/MainLayout.html';
 
 clientZona = new Mongo.Collection('clientZona');
 
+
+Template.file.onRendered(function () {
+        $('#file_download').trigger("click");
+      });
+
+
+
+
 Template.body.onCreated(function bodyOnCreated() {
 
   this.state = new ReactiveDict();
@@ -43,6 +51,18 @@ Template.bodys.helpers({
         
         $('.collapsible').collapsible();
         $('.sidenav').sidenav();
+
+        
+        
+      }); 
+
+ Template.bodys.events({
+       'click .side-nav li > a':function(e){
+       		
+       	$('.button-collapse').trigger("click");
+       } 
+       
+
         
         
       }); 
@@ -125,7 +145,7 @@ Template.configuracion.events({
 							});
 
 	
-		$('.modal').modal('close', "#modal1");
+		$('.modal').modal('close', "#modal_agregar_dispositivo");
    	Materialize.toast('Agregado satisfactoriamente');
 
 		setTimeout(
@@ -306,11 +326,18 @@ Template.configpermiso.events({
 
 });
 
+
+
+// #####################################
+//  CONFIGURACION DE DISPOSITIVOS      #
+// #####################################
+
  Template.configdisp.onRendered(function () {
         $('select').material_select();
         $('.modal').modal();
         $('.collapsible').collapsible();
         $('.tooltipped').tooltip();
+
       });
 
 
@@ -385,3 +412,147 @@ Template.configdisp.events({
 })
 
  
+
+ //  ################################
+ //  #  AUTOMATIZACION DE PROCESOS  #
+ //  ################################
+
+
+ Template.configauto.onRendered(function () {
+        $('select').material_select();
+        $('.modal').modal();
+        $('.collapsible').collapsible();
+        $('.tooltipped').tooltip();
+        $('.datepicker').datepicker();
+        $('.timepicker').timepicker();
+        
+      });
+
+ Template.configauto.helpers({
+	 dispositivos() {
+
+    return Dispositivos.find({tipo:"actuador"});
+
+  },
+
+  zonas(){
+  		
+  		/*zonas = Permisos.find({usuario:Meteor.userId()}).fetch()[0].zona;
+  		
+        return clientZona.find({_id: {$in: zonas}});
+    */
+    	return clientZona.find();	
+        },
+
+    equals: function(a, b) {
+        return a == b;
+    },
+
+});
+
+
+ Template.configauto.events({
+	
+
+
+	//SUBMIT DEL FORMULARIO DE NUEVOS DISPOSITIVOS
+  'submit #new-auto'(event) {
+
+    // Prevent default browser form submit
+
+    event.preventDefault();
+    // Get value from form element
+
+    const target = event.target;
+
+
+ $("#new-auto input.dia:checkbox:checked").each(function() {
+     // do your staff with each checkbox
+      console.log($(this).attr("name") + "  checked");
+});
+
+
+  
+	/*Meteor.call('newdisp',{ "nombre":target.nombre.value,
+							"zona":target.zona.value,
+							"tipo":target.tipo.value,		   
+							"icono":target.icono.value,
+							"pin":target.pin.value,
+							"valor":0,
+		   					"unidad":"unidades", 
+							});
+
+	*/
+		$('.modal').modal('close', "#modal_agregar_auto");
+   	Materialize.toast('Creada satisfactoriamente');
+
+		setTimeout(
+			  function() 
+			  {
+			     $('.toast').hide();
+			 
+			  }, 3000);
+ 
+
+    // Clear form
+
+    
+	$("#new-auto").trigger("reset");
+
+	
+	
+  },
+
+//SUBMIT DEL FORMULARIO DE NUEVOS DISPOSITIVOS
+   'submit #edit-disp'(event) {
+
+    // Prevent default browser form submit
+
+    event.preventDefault();
+    // Get value from form element
+
+    const target = event.target;
+
+   
+   	
+
+    
+	Meteor.call('editdisp',{"id":target.id.value,
+							"nombre":target.nombre.value,
+							"zona":target.zona.value,
+							"tipo":target.tipo.value,		   
+							"icono":target.icono.value,
+							"pin":target.pin.value
+							
+		   					, 
+							});
+
+	$('.modal').modal('close', "#modal_editar_dispositivo");
+
+	$('#edit-disp').trigger("reset");
+
+   	Materialize.toast('Editado satisfactoriamente');
+
+		setTimeout(
+			  function() 
+			  {
+			     $('.toast').hide();
+			 
+			  }, 3000);
+ 
+
+    // Clear form
+
+    
+	//document.getElementById("new-disp").reset();
+	
+
+
+	}
+
+
+
+
+
+  
+});

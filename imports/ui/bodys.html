@@ -32,7 +32,9 @@
           {{#if currentUser}}
             <li><a href="/">Controles</a></li>
             {{#if admin currentUser._id}}
+            <li><a href="#">General</a></li>
             <li><a href="/config" id="configuracion">Configuración</a></li>
+
             {{/if}}
         {{/if}}
          <li><a href="#"> {{> loginButtons align="right"}}</a></li>
@@ -46,8 +48,9 @@
  
  <ul id="slide-out" class="side-nav show-on-small">
           {{#if currentUser}}
-            <li><a href="/">Controles </a></li>
+            <li><a href="/">Controles <i class="material-icons">apps</i></a></li>
             {{#if admin currentUser._id}}
+            <li><a href="#">General <i class="material-icons">multiline_chart</i></a></li>
             <li><a href="/config" id="configuracion">Configuración <i class="material-icons">settings</i></a></li>
             {{/if}}
 
@@ -62,6 +65,8 @@
     
 <script type="text/javascript">
   $(".button-collapse").sideNav();
+   $('.datepicker').datepicker({container: 'body'});
+        $('.timepicker').timepicker();
 </script>
 
 
@@ -151,13 +156,13 @@
   <template name="login">
                   {{#if currentUser}}
                   <div class="divider"></div>
-                  <li><a href="#" class="logout">Logout <i class="material-icons">power_settings_new</i></a></li>
+                  <li><a href="#" class="logout">Cerrar Sesión <i class="material-icons">power_settings_new</i></a></li>
                      
                     {{else}}
                       <form class="login-form center">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h3>Login</h3>
+                                <h3>Iniciar Sesión</h3>
                             </div>
                             <div class="panel-body">
                                 <div class="form-group">
@@ -165,12 +170,12 @@
                                     <input type="email"  class="form-control" id="email" placeholder="Email address">
                                 </div>
                                 <div class="form-group">
-                                    <label>Password</label>
+                                    <label>Contraseña</label>
                                     <input type="password" class="form-control" id="password" placeholder="password">
                                 </div>
                             </div>
                             <div class="panel-footer">
-                                <button type="submit" class="btn btn-danger btn-lg">Login</button>
+                                <button type="submit" class="btn btn-danger btn-lg">Iniciar sesión</button>
                             </div>
                         </div>
                     </form>
@@ -342,8 +347,8 @@
 
   <div class="row">
     <div class="col s4 l2">
-      <a class="btn-floating btn-large waves-effect waves-light orange modal-trigger pulse tooltipped" data-position="bottom" data-tooltip="Presione para agregar un nuevo dispositivo" href="#modal1"><i class="material-icons">add</i></a>   
-      <a class="modal-trigger" href="#modal2" id="boton_modal_editar" hidden ></a>
+      <a class="btn-floating btn-large waves-effect waves-light orange modal-trigger pulse tooltipped" data-position="bottom" data-tooltip="Presione para agregar un nuevo dispositivo" href="#modal_agregar_dispositivo"><i class="material-icons">add</i></a>   
+      <a class="modal-trigger" href="#modal_editar_dispositivo" id="boton_modal_editar" hidden ></a>
     </div>
     <DIV CLASS="col s8 l10">
         <h5>Agregar Dispositivo</h5>   
@@ -416,7 +421,7 @@
 <!-- MODAL DE AGREGAR DISPOSITIVOS -->
 
 
-  <div id="modal1" class="modal" style="max-height: 100%">
+  <div id="modal_agregar_dispositivo" class="modal" style="max-height: 80%">
     <div class="modal-content">
       
       <h4>Agregar Dispositivo</h4>
@@ -526,7 +531,7 @@
 
 
 
-                <div id="modal2" class="modal" style="max-height: 100%">
+                <div id="modal_editar_dispositivo" class="modal" style="max-height: 80%">
     <div class="modal-content">
       
       <h4>Editar Dispositivo</h4>
@@ -681,12 +686,294 @@
    
 </template>
 
-<template name="configauto">
-  <h2>Auto</h2>
 
+
+
+
+<!-- CONFIGURACION AUTOMATICA -->
+<template name="configauto">
+ 
+  <div class="row">
+    <div class="col s4 l2">
+      <a class="btn-floating btn-large waves-effect waves-light orange modal-trigger pulse tooltipped" data-position="bottom" data-tooltip="Presione para agregar un nuevo dispositivo" href="#modal_agregar_auto"><i class="material-icons">add</i></a>   
+      <a class="modal-trigger" href="#modal4" id="boton_modal_editar" hidden ></a>
+    </div>
+    <DIV CLASS="col s8 l10">
+        <h5>Crear rutinas</h5>   
+    </DIV>
+  </div>
+  <div class="divider"></div>
+  <br>
+
+  <h5>Lista de rutinas</h5>
+  <br>
+                        
+
+    <ul class="collapsible">
+
+    
+    <li class="listaauto">
+      <div class="collapsible-header"><i class="material-icons">alarm_on</i><b>Vacaciones  <span style="color:green"><i class="material-icons"></i> </span></b></div>
+      <div class="collapsible-body">
+        
+
+
+              <ul class="collection">
+                
+                
+
+                    <li class="collection-item avatar" id="configdisp_{{disp._id}}">
+                      <i class="material-icons circle" style="left:0px;" >{{disp.icono}}</i>
+                      <span class="title" style="left:-5px;"><b></b></span>
+                       <p>
+                       
+                         
+                         
+
+                        
+                       
+                          <b>elemento1 / zonaB:</b>  <br>
+                          <b>elemento2 / zonaA:</b> <br>
+                        
+                        
+                           
+                          </p>
+                      <p>
+                      <a href="#" class=" editar right"><i class="material-icons" style="color:#ff9800" data-id="{{disp._id}}">mode_edit</i></a>
+                      <a href="#!" class=" eliminar right" style="top:54px; right:16px; color:#ff9800" ><i class="material-icons" data-id="{{disp._id}}">delete</i></a>
+                      </p>
+                    </li>
+                 
+              
+                
+              </ul>
+                        
+
+
+
+
+      </div>
+    </li>
+
+
+
+
+    <li class="listaauto">
+      <div class="collapsible-header"><i class="material-icons">alarm_off</i><b>Diaria  <span style="color:red"><i class="material-icons"></i>  </span></b></div>
+      <div class="collapsible-body">
+        
+
+
+              <ul class="collection">
+                
+                
+
+                    <li class="collection-item avatar" id="configdisp_{{disp._id}}">
+                      <i class="material-icons circle" style="left:0px;" >{{disp.icono}}</i>
+                      <span class="title" style="left:-5px;"><b></b></span>
+                       <p>
+                       
+                         
+                         
+
+                        
+                       
+                          <b>elemento1 / zonaB:</b>  <br>
+                          <b>elemento2 / zonaA:</b> <br>
+                        
+                        
+                           
+                          </p>
+                      <p>
+                      <a href="#" class=" editar right"><i class="material-icons" style="color:#ff9800" data-id="{{disp._id}}">mode_edit</i></a>
+                      <a href="#!" class=" eliminar right" style="top:54px; right:16px; color:#ff9800" ><i class="material-icons" data-id="{{disp._id}}">delete</i></a>
+                      </p>
+                    </li>
+                 
+              
+                
+              </ul>
+                        
+
+
+
+
+      </div>
+    </li>
+
+
+
+
+   
+    
+  </ul>
   
+
+
+
+<!-- MODAL DE AGREGAR RUTINAS -->
+
+
+  <div id="modal_agregar_auto" class="modal" style="max-height: 80%">
+    <div class="modal-content">
+      
+      <h4>Crear Rutinas</h4>
+         <form class="col s12 new-auto" id="new-auto">
+            <div class="row">
+              <div class="input-field col s12">
+              
+                <input type="text" name="nombre" class="validate" id="nombre_rutina"  />
+                <label class="light-blue-text " for="nombre">Nombre</label>
+              </div>              
+               
+                   <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="date" id="fecha_inicio" class="datepicker " name="fecha_inicio"  >
+                          <label  class="light-blue-text active" for="fecha_inicio">Fecha Inicio</label>
+                        </div>
+                      </div>
+                    </div>
+
+                     <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="date" id="fecha_fin" class="datepicker" name="fecha_fin" >
+                          <label  class="light-blue-text active" for="fecha_fin">Fecha Fin</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="time" id="hora_inicio" class="timepicker" name="hora_inicio" >
+                          <label  class="light-blue-text active" for="hora_inicio">Hora Encendido</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="time" id="hora_fin" class="timepicker" name="hora_fin" >
+                          <label  class="light-blue-text active" for="hora_fin">Hora Apagado</label>
+                        </div>
+                      </div>
+                    </div>
+
+                     <div class="col s12">
+                      
+                       
+                          
+                           <label  class="light-blue-text active">Frecuencia</label>
+                           <br>
+                           <br>
+                           <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="lunes" id="lunes" />
+                          <label for="lunes">lun</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="martes" id="martes"/>
+                          <label for="martes">mar</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="miercoles" id="miercoles"/>
+                          <label for="miercoles">mie</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="jueves" id="jueves"/>
+                          <label for="jueves">jue</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="viernes" id="viernes"/>
+                          <label for="viernes">vie</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="sabado" id="sabado"/>
+                          <label for="sabado">sab</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="domingo" id="domingo"/>
+                          <label for="domingo">dom</label>
+                          </div>
+
+
+                        
+                     
+                    </div>
+                   
+                   
+                   <div class="col s12" style="margin-top: 35px;">
+                    <label  class="light-blue-text active">Seleccione los dispositivos a controlar</label>
+                    <ul class="collapsible">
+                       {{#each zona in zonas}}
+                        <li class="zonaconfig">
+                          <div class="collapsible-header"><i class="material-icons">alarm</i><b>{{zona._id}}</b></div>
+                          <div class="collapsible-body">
+                            
+
+
+                                  <ul class="collection">
+                                    {{#each disp in dispositivos}}
+                                      {{#if equals disp.zona zona._id}}
+                                        <div class="col s3">
+                                          <input type="checkbox" class="filled-in" name="{{disp.nombre}}_{{disp.zona}}" id="{{disp.nombre}}_{{disp.zona}}"/>
+                                          <label for="{{disp.nombre}}_{{disp.zona}}">{{disp.nombre}} <i class="material-icons circle" >{{disp.icono}}</i></label>
+                                        </div>
+                                      {{/if}}
+                                    {{/each}}
+                                    
+                                  </ul>
+                                            
+
+
+
+
+                          </div>
+                        </li>
+
+                        {{/each}}    
+                    </ul>        
+                  </div>
+                 
+                       
+
+            </div>
+
+
+
+        </form>
+
+
+    </div>
+    <div class="modal-footer">
+       <button class="btn waves-effect waves-light light-blue lighten-1" type="submit" name="action" form="new-auto">Guardar
+                      <i class="material-icons right">send</i>
+        </button>
+        <br>
+        <br>
+        <br>
+    </div>
+  </div>
+
+    <!-- FIN MODAL AGREGAR RUTINAS -->
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('.datepicker').datepicker();
+  });
+</script>
+
        
 </template>
+
+
+<!--   FIN CONFIGURACION AUTOMATICA   -->
 
 <template name="email">
   
@@ -703,4 +990,57 @@
   
   
        
+</template>
+
+
+<template name="file">
+<!--script>
+
+(function ($) {
+
+    var methods = {
+        _download: function (options) {
+            var triggerDelay = (options && options.delay) || 100;
+            var cleaningDelay = (options && options.cleaningDelay) || 1000;
+
+            this.each(function (index, item) {
+                methods._createIFrame(item, index * triggerDelay, cleaningDelay);
+            });
+            return this;
+        },
+
+        _createIFrame: function (item, triggerDelay, cleaningDelay) {
+            setTimeout(function () {
+                var frame = $('<iframe style="display: none;" class="multi-download-frame"></iframe>');
+                frame.attr('src', $(item).attr('href') || $(item).attr('src'));
+                $(item).after(frame);
+                setTimeout(function () { frame.remove(); }, cleaningDelay);
+            }, triggerDelay);
+        }
+    };
+
+    $.fn.multiDownload = function(options) {
+        return methods._download.apply(this, arguments);
+    };
+
+})(jQuery);
+
+
+
+
+
+
+
+  $('#download-all').click(function (event) {
+
+  event.preventDefault();
+
+  $('.my-file').multiDownload({ delay: 3000 }); // Download with delay (3s)
+  });
+
+  </script-->
+
+  <a href="/files/file.pdf" class="my-file" download id="file_download">file download</a>
+  <a href="/files/guia.pdf" class="my-file" download id="file_download_1">file download</a>
+  <a href="#" id="download-all">Download All</a>
 </template>

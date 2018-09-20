@@ -12,9 +12,9 @@ if (Meteor.isServer) {
 
   // This code only runs on the server
   var mqtt = require('mqtt'); 
-  //var client = mqtt.connect('mqtt://200.8.81.144:1883');
+  //var client = mqtt.connect('mqtt://200.8.81.156:1883');
   var client = mqtt.connect('mqtt://localhost:1883');
-  client.subscribe('actuador');
+  client.subscribe('casa/leds');
   client.subscribe('sensor');
 
 
@@ -70,7 +70,17 @@ if (Meteor.isServer) {
         	Dispositivos.update({_id:data.ide},{$set: {estado:data.estado,update:new Date()}});
             //client.publish(data.topic, data.message);
             var mensaje = data.ide+" turn "+data.estado;
-            client.publish('actuador',mensaje);
+
+            //##############################################
+            //    DEVOLVER AL ESTADO INICIAL               #       
+            //    TOPICO="ACTUADOR", MENSAJE="TURN ON/OFF" # 
+            //##############################################
+            if (data.estado=="off"){
+              client.publish('casa/leds',"ledcuartoff");  
+            }else if (data.estado=="on"){
+              client.publish('casa/leds',"ledcuarton");  
+            }
+            
         },
 
 
@@ -212,6 +222,8 @@ client.on('message', Meteor.bindEnvironment(function (topic, message) {
 
 };
 
+
+  console.log(message.toString());
 
 }));
 
