@@ -5,6 +5,7 @@ import { ReactiveAggregate } from 'meteor/jcbernack:reactive-aggregate';
 export const Dispositivos = new Mongo.Collection('dispositivos');
 export const Permisos = new Mongo.Collection('permisos');
 export const Admin = new Mongo.Collection('admin');
+export const Rutinas = new Mongo.Collection('rutinas');
 Contador = new Mongo.Collection('contadorDispositivo');
 
 
@@ -57,6 +58,12 @@ if (Meteor.isServer) {
    Meteor.publish('dispositivos', function dispositivosPublication() {
 
     return Dispositivos.find();
+
+  });
+
+   Meteor.publish('rutinas', function rutinasPublication() {
+
+    return Rutinas.find();
 
   });
 
@@ -160,6 +167,7 @@ if (Meteor.isServer) {
 
 
           //HACER LLAMADA A FUNCION DE ACTUALIZAR DATOS EN RPI
+          //client.publish('casa/leds',"ledcuarton");  v
 
 
         },
@@ -182,6 +190,7 @@ if (Meteor.isServer) {
                                   });
         
              //HACER LLAMADA A FUNCION DE ACTUALIZAR DATOS EN RPI
+             // client.publish('casa/leds',"ledcuarton");  
 
           
 
@@ -201,7 +210,43 @@ if (Meteor.isServer) {
               Permisos.update({},{ $pull: { zona:a} },{ upsert: false, multi: true });
           }
 
-        }        
+        },    
+
+
+
+        newauto: function(d){
+          //console.log(d.frecuencia.split(" "));
+          Rutinas.insert({
+                        nombre:d.nombre,
+                        fecha_inicio:d.fecha_inicio,
+                        fecha_fin:d.fecha_fin,
+                        hora_encendido:d.hora_encendido,
+                        hora_apagado:d.hora_apagado,
+                        frecuencia:d.frecuencia.split(" "),
+                        dispositivos:d.dispositivos.split(" ")
+                  });
+        },
+
+        editauto: function(d){
+          //console.log(d.frecuencia.split(" "));
+          Rutinas.update({_id:d.id},
+                        {$set:{
+                          nombre:d.nombre,
+                          fecha_inicio:d.fecha_inicio,
+                          fecha_fin:d.fecha_fin,
+                          hora_encendido:d.hora_encendido,
+                          hora_apagado:d.hora_apagado,
+                          frecuencia:d.frecuencia.split(" "),
+                          dispositivos:d.dispositivos.split(" ")
+                  }});
+        },
+
+        cambioestatus: function(d){
+          Rutinas.update({_id:d.id},{$set:{estatus:d.estado}});
+          // ENVIAR MENSAJE MQTT
+          // client.publish('casa/leds',"ledcuarton");  
+
+        }  
 
 
 

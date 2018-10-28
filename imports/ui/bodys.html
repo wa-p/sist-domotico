@@ -380,7 +380,7 @@
                 {{#each disp in dispositivos}}
                   {{#if equals disp.zona zona._id}}
 
-                    <li class="collection-item avatar" id="configdisp_{{disp._id}}">
+                    <li class="collection-item avatar" id="configdisp_{{disp._id}}" style="padding-bottom: 30px;">
                       <i class="material-icons circle" style="left:0px;" >{{disp.icono}}</i>
                       <span class="title" style="left:-5px;"><b>{{disp.nombre}}</b></span>
                        <p><b>Tipo:</b> {{disp.tipo}} <br>
@@ -396,6 +396,7 @@
                         {{/if}}
                            <b>Pin:</b> {{disp.pin}} <br>
                           </p>
+
                       <p>
                       <a href="#" class=" editar right"><i class="material-icons" style="color:#ff9800" data-id="{{disp._id}}">mode_edit</i></a>
                       <a href="#!" class=" eliminar right" style="top:54px; right:16px; color:#ff9800" ><i class="material-icons" data-id="{{disp._id}}">delete</i></a>
@@ -696,7 +697,7 @@
   <div class="row">
     <div class="col s4 l2">
       <a class="btn-floating btn-large waves-effect waves-light orange modal-trigger pulse tooltipped" data-position="bottom" data-tooltip="Presione para agregar un nuevo dispositivo" href="#modal_agregar_auto"><i class="material-icons">add</i></a>   
-      <a class="modal-trigger" href="#modal4" id="boton_modal_editar" hidden ></a>
+      <a class="modal-trigger" href="#modal_editar_auto" id="boton_modal_editar_auto" hidden ></a>
     </div>
     <DIV CLASS="col s8 l10">
         <h5>Crear rutinas</h5>   
@@ -712,35 +713,74 @@
     <ul class="collapsible">
 
     
+    {{#each rutina in rutinas}}
     <li class="listaauto">
-      <div class="collapsible-header"><i class="material-icons">alarm_on</i><b>Vacaciones  <span style="color:green"><i class="material-icons"></i> </span></b></div>
+     
+      <div class="collapsible-header"><i class="material-icons {{estatus rutina.estatus}} accent-4">alarm_on</i><b>{{rutina.nombre}}</b></div>
+     
+
       <div class="collapsible-body">
         
 
 
               <ul class="collection">
-                
-                
 
-                    <li class="collection-item avatar" id="configdisp_{{disp._id}}">
-                      <i class="material-icons circle" style="left:0px;" >{{disp.icono}}</i>
-                      <span class="title" style="left:-5px;"><b></b></span>
-                       <p>
-                       
-                         
-                         
+                <div class="switch center">
+                    <p>Estatus</p>
+                    <label>
+                      Inactiva
+                      {{# if equals rutina.estatus "inactiva"}}
+                      <input type="checkbox" data-id={{rutina._id}}  class="switch cambio-estatus" >
+                      
+                      {{else}}
+                      <input type="checkbox" data-id={{rutina._id}} checked class="switch cambio-estatus">
+                      
+                      {{/if}}
+                      <span class="lever"></span>
+                      Activa
+                    </label>
+                  </div>
 
+                          <li class="collection-item">
+                             
+                          </li>
+                
+                           <li class="collection-item">
+                            <b>Frecuencia</b>
+                            <p>{{espacio rutina.frecuencia}} </p>
+                         
+                          </li>
+
+                           <li class="collection-item">
+                            <b>Hora</b>
+                            <p>Encendido: {{ hora rutina.hora_encendido}}</p>
+                            <p>Apagado: {{hora rutina.hora_apagado}}</p>
+                         
+                          </li>
+
+                          <li class="collection-item">
+                            <b>Fecha</b>
+                            <p>Inicio: {{fecha rutina.fecha_inicio}}</p>
+                            <p>Fin: {{ fecha rutina.fecha_fin}}</p>
+                         
+                          </li>
+                    
                         
                        
-                          <b>elemento1 / zonaB:</b>  <br>
-                          <b>elemento2 / zonaA:</b> <br>
+                        {{#each dispositivo in rutina.dispositivos}}
+                         <li class="collection-item">
+                          <b>Dispositivos</b> <br><br>
+                            <i class="material-icons" style="margin-right: 10px;">apps</i> <b> {{dispositivo.nombre}} elemento1 / zonaB: </b> </li> 
                         
+                          
+                        {{/each}}
+                            
                         
-                           
-                          </p>
+                          <li class="collection-item">    
+                          
                       <p>
-                      <a href="#" class=" editar right"><i class="material-icons" style="color:#ff9800" data-id="{{disp._id}}">mode_edit</i></a>
-                      <a href="#!" class=" eliminar right" style="top:54px; right:16px; color:#ff9800" ><i class="material-icons" data-id="{{disp._id}}">delete</i></a>
+                      <a href="#" class=" editar_auto right"><i class="material-icons" style="color:#ff9800" data-id="{{rutina._id}}">mode_edit</i></a>
+                      <a href="#!" class=" eliminar_auto right" style="top:54px; right:16px; color:#ff9800" ><i class="material-icons" data-id="{{rutina._id}}">delete</i></a>
                       </p>
                     </li>
                  
@@ -754,52 +794,11 @@
 
       </div>
     </li>
+    {{/each}}
 
 
 
-
-    <li class="listaauto">
-      <div class="collapsible-header"><i class="material-icons">alarm_off</i><b>Diaria  <span style="color:red"><i class="material-icons"></i>  </span></b></div>
-      <div class="collapsible-body">
-        
-
-
-              <ul class="collection">
-                
-                
-
-                    <li class="collection-item avatar" id="configdisp_{{disp._id}}">
-                      <i class="material-icons circle" style="left:0px;" >{{disp.icono}}</i>
-                      <span class="title" style="left:-5px;"><b></b></span>
-                       <p>
-                       
-                         
-                         
-
-                        
-                       
-                          <b>elemento1 / zonaB:</b>  <br>
-                          <b>elemento2 / zonaA:</b> <br>
-                        
-                        
-                           
-                          </p>
-                      <p>
-                      <a href="#" class=" editar right"><i class="material-icons" style="color:#ff9800" data-id="{{disp._id}}">mode_edit</i></a>
-                      <a href="#!" class=" eliminar right" style="top:54px; right:16px; color:#ff9800" ><i class="material-icons" data-id="{{disp._id}}">delete</i></a>
-                      </p>
-                    </li>
-                 
-              
-                
-              </ul>
-                        
-
-
-
-
-      </div>
-    </li>
+    
 
 
 
@@ -850,8 +849,8 @@
                       <div class="row">
                         <div class="input-field col s12">
                           
-                          <input type="time" id="hora_inicio" class="timepicker" name="hora_inicio" >
-                          <label  class="light-blue-text active" for="hora_inicio">Hora Encendido</label>
+                          <input type="time" id="hora_inicio" class="timepicker" name="hora_encendido" >
+                          <label  class="light-blue-text active" for="hora_encendido">Hora Encendido</label>
                         </div>
                       </div>
                     </div>
@@ -860,8 +859,8 @@
                       <div class="row">
                         <div class="input-field col s12">
                           
-                          <input type="time" id="hora_fin" class="timepicker" name="hora_fin" >
-                          <label  class="light-blue-text active" for="hora_fin">Hora Apagado</label>
+                          <input type="time" id="hora_fin" class="timepicker" name="hora_apagado" >
+                          <label  class="light-blue-text active" for="hora_apagado">Hora Apagado</label>
                         </div>
                       </div>
                     </div>
@@ -922,7 +921,7 @@
                                     {{#each disp in dispositivos}}
                                       {{#if equals disp.zona zona._id}}
                                         <div class="col s3">
-                                          <input type="checkbox" class="filled-in" name="{{disp.nombre}}_{{disp.zona}}" id="{{disp.nombre}}_{{disp.zona}}"/>
+                                          <input type="checkbox" class="filled-in dispositivo_auto" name="{{disp._id}}" id="{{disp.nombre}}_{{disp.zona}}"/>
                                           <label for="{{disp.nombre}}_{{disp.zona}}">{{disp.nombre}} <i class="material-icons circle" >{{disp.icono}}</i></label>
                                         </div>
                                       {{/if}}
@@ -962,6 +961,172 @@
   </div>
 
     <!-- FIN MODAL AGREGAR RUTINAS -->
+
+
+<!-- MODAL DE EDITAR RUTINAS -->
+
+
+  <div id="modal_editar_auto" class="modal" style="max-height: 80%">
+    <div class="modal-content">
+      
+      <h4>Crear Rutinas</h4>
+         <form class="col s12 edit-auto" id="edit-auto">
+            <div class="row">
+              <div class="input-field col s12">
+              
+                <input type="text" name="nombre" class="validate" id="edit_nombre_rutina"  />
+                <label class="light-blue-text " for="edit_nombre_rutina">Nombre</label>
+              </div>              
+               
+                   <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="date" id="edit_fecha_inicio" class="datepicker " name="fecha_inicio"  >
+                          <label  class="light-blue-text active" for="edit_fecha_inicio">Fecha Inicio</label>
+                        </div>
+                      </div>
+                    </div>
+
+                     <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="date" id="edit_fecha_fin" class="datepicker" name="fecha_fin" dateformat="d M y" >
+                          <label  class="light-blue-text active" for="edit_fecha_fin">Fecha Fin</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="time" id="edit_hora_encendido" class="timepicker" name="hora_encendido" >
+                          <label  class="light-blue-text active" for="edit_hora_encendido">Hora Encendido</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col s12">
+                      <div class="row">
+                        <div class="input-field col s12">
+                          
+                          <input type="time" id="edit_hora_apagado" class="timepicker" name="hora_apagado" >
+                          <label  class="light-blue-text active" for="edit_hora_apagado">Hora Apagado</label>
+                        </div>
+                      </div>
+                    </div>
+
+                     <div class="col s12">
+                      
+                       
+                          
+                           <label  class="light-blue-text active">Frecuencia</label>
+                           <br>
+                           <br>
+                           <div class="col s5 l2" >
+                            
+                           
+                              <input type="checkbox" class="filled-in dia" name="lunes" id="edit_lunes" />
+                        
+                              <label for="edit_lunes">lun</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="martes" id="edit_martes"/>
+                          <label for="edit_martes">mar</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="miercoles" id="edit_miercoles"/>
+                          <label for="edit_miercoles">mie</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="jueves" id="edit_jueves"/>
+                          <label for="edit_jueves">jue</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="viernes" id="edit_viernes"/>
+                          <label for="edit_viernes">vie</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="sabado" id="edit_sabado"/>
+                          <label for="edit_sabado">sab</label>
+                          </div>
+                          <div class="col s5 l2" >
+                          <input type="checkbox" class="filled-in dia" name="domingo" id="edit_domingo"/>
+                          <label for="edit_domingo">dom</label>
+                          </div>
+
+
+                        
+                     
+                    </div>
+                   
+                   
+                   <div class="col s12" style="margin-top: 35px;">
+                    <label  class="light-blue-text active">Seleccione los dispositivos a controlar</label>
+                    <ul class="collapsible">
+                       {{#each zona in zonas}}
+                        <li class="zonaconfig">
+                          <div class="collapsible-header"><i class="material-icons">alarm</i><b>{{zona._id}}</b></div>
+                          <div class="collapsible-body">
+                            
+
+
+                                  <ul class="collection">
+                                    {{#each disp in dispositivos}}
+                                      {{#if equals disp.zona zona._id}}
+                                        <div class="col s3">
+                                             {{#if disp_auto_check disp._id}}
+                                                <input type="checkbox" class="filled-in dispositivo_auto" name="{{disp._id}}" id="edit_{{disp.nombre}}_{{disp.zona}}" checked />
+                                              {{else}}
+                                                <input type="checkbox" class="filled-in dispositivo_auto" name="{{disp._id}}" id="edit_{{disp.nombre}}_{{disp.zona}}"/>
+                                              {{/if}}
+                                          <label for="edit_{{disp.nombre}}_{{disp.zona}}">{{disp.nombre}} <i class="material-icons circle" >{{disp.icono}}</i></label>
+                                        </div>
+                                      {{/if}}
+                                    {{/each}}
+                                    
+                                  </ul>
+                                            
+
+
+
+
+                          </div>
+                        </li>
+
+                        {{/each}}    
+                    </ul>        
+                  </div>
+                 
+                       
+
+            </div>
+
+
+
+        </form>
+
+
+    </div>
+    <div class="modal-footer">
+       <button class="btn waves-effect waves-light light-blue lighten-1" type="submit" name="action" form="edit-auto">Guardar
+                      <i class="material-icons right">send</i>
+        </button>
+        <br>
+        <br>
+        <br>
+    </div>
+  </div>
+
+    <!-- FIN MODAL EDITAR RUTINAS -->
+
+
+
+
+
+
 
 <script type="text/javascript">
   $(document).ready(function(){

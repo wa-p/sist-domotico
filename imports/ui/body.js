@@ -2,6 +2,7 @@ import { Template } from 'meteor/templating';
 import { Dispositivos } from '../api/dispositivos.js';
 import { Permisos } from '../api/dispositivos.js';
 import { Admin } from '../api/dispositivos.js';
+import { Rutinas } from '../api/dispositivos.js';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Session } from 'meteor/session';
 //import { FlowRouter } from 'meteor/kadira:flow-router';
@@ -9,6 +10,12 @@ import './bodys.html';
 import '../../client/layouts/MainLayout.html';
 
 clientZona = new Mongo.Collection('clientZona');
+
+// CLAVE SERVIDOR      AAAA6qbCzgs:APA91bGmxq_pVmXoT2c0m_D-10eBne0nAsKihtrc4ZqAv-s_zLiqfpUGf-OOL6pvvKHOUGDN2L607TpffGfI-thzV4ji_abmpdgZGSdty3xSP1nyDyvXJDUhr9EUo9diBN-wnzvjJ5MT
+
+//CLAVE SERVIDOR HEREDADA   AIzaSyBp_rnlPVcQhAuqTFGMZVa6gZFoIAX3z-E
+
+// SENDER ID    1007820131851
 
 
 Template.file.onRendered(function () {
@@ -21,14 +28,15 @@ Template.file.onRendered(function () {
 Template.body.onCreated(function bodyOnCreated() {
 
   this.state = new ReactiveDict();
-  Session.set('zona_actual',null)
-
+  Session.set('zona_actual',null);
+  Session.set('rutina_editar',null);
 
   Meteor.subscribe('dispositivos');
   Meteor.subscribe('zonas');
   Meteor.subscribe('user');
   Meteor.subscribe('permisos');
   Meteor.subscribe('admin');
+  Meteor.subscribe('rutinas');
 
 
 
@@ -447,6 +455,51 @@ Template.configdisp.events({
     equals: function(a, b) {
         return a == b;
     },
+    rutinas(){
+    	return Rutinas.find();
+    },
+    espacio: function(a){
+    	
+    	return a.toString().replace(/,/g , ', ');
+    },
+    fecha: function(a){
+    	var b = a.split("-");
+    	return b[2]+"/"+b[1]+"/"+b[0];
+    },
+    hora: function(a){
+    	var b = a.split(":");
+    	var c=0;
+    	var d = "A.M";
+
+    	if (parseInt(b[0],10) > 12){
+    		c = parseInt(b[0])-12;
+    		d = "P.M";
+    	}else{
+    		c = parseInt(b[0]);
+    	}
+
+    	if (parseInt(b[0],10) == 12){
+    		 d = "P.M";
+    	}
+    	return c +":"+b[1]+" "+d;
+    },
+    estatus: function(a){
+    	if (a=="activa"){
+    		return "green-text";
+    	}else if(a=="inactiva"){
+    		return "red-text";
+    	}
+    },
+
+    freq: function(a){
+    	return (Rutinas.find({frecuencia:a}).count() >= 1);
+    },
+
+    disp_auto_check: function(a){
+    	var rutina = Rutinas.findOne({_id:Session.get('rutina_editar')});
+    	return rutina.dispositivos.includes(a);
+    }
+
 
 });
 
@@ -455,56 +508,66 @@ Template.configdisp.events({
 	
 
 
-	//SUBMIT DEL FORMULARIO DE NUEVOS DISPOSITIVOS
+	//SUBMIT DEL FORMULARIO DE NUEVAS RUTINAS
   'submit #new-auto'(event) {
 
     // Prevent default browser form submit
 
-    event.preventDefault();
-    // Get value from form element
+	    event.preventDefault();
+	    // Get value from form element
 
-    const target = event.target;
+	    const target = event.target;
 
+	    var frecuencia="";
+	    var dispositivos ="";
 
- $("#new-auto input.dia:checkbox:checked").each(function() {
-     // do your staff with each checkbox
-      console.log($(this).attr("name") + "  checked");
-});
+	    //DIAS SELECCIONADOS
+		 $("#new-auto input.dia:checkbox:checked").each(function() {
+		     
+		      frecuencia = frecuencia+ $(this).attr("name")  + " "  ;
+		});
 
+		 		frecuencia = $.trim(frecuencia);
+		//DIAS SELECCIONADOS
+		 $("#new-auto input.dispositivo_auto:checkbox:checked").each(function() {
+		     
+		      dispositivos = dispositivos + $(this).attr("name") + " ";
+		});
+		 	dispositivos = $.trim(dispositivos);
 
-  
-	/*Meteor.call('newdisp',{ "nombre":target.nombre.value,
-							"zona":target.zona.value,
-							"tipo":target.tipo.value,		   
-							"icono":target.icono.value,
-							"pin":target.pin.value,
-							"valor":0,
-		   					"unidad":"unidades", 
-							});
+	  
+		Meteor.call('newauto',{ "nombre":target.nombre.value,
+								"fecha_inicio":target.fecha_inicio.value,
+								"fecha_fin":target.fecha_fin.value,		   
+								"hora_encendido":target.hora_encendido.value,
+								"hora_apagado":target.hora_apagado.value,
+								"frecuencia":frecuencia,
+			   					"dispositivos":dispositivos, 
+								});
 
-	*/
+		
 		$('.modal').modal('close', "#modal_agregar_auto");
-   	Materialize.toast('Creada satisfactoriamente');
+	   	Materialize.toast('Creada satisfactoriamente');
 
-		setTimeout(
-			  function() 
-			  {
-			     $('.toast').hide();
-			 
-			  }, 3000);
- 
+			setTimeout(
+				  function() 
+				  {
+				     $('.toast').hide();
+				 
+				  }, 3000);
+	 
 
-    // Clear form
+	    // Clear form
 
-    
-	$("#new-auto").trigger("reset");
+	    
+		$("#new-auto").trigger("reset");
 
 	
 	
   },
 
-//SUBMIT DEL FORMULARIO DE NUEVOS DISPOSITIVOS
-   'submit #edit-disp'(event) {
+//SUBMIT DEL FORMULARIO DE EDITAR RUTINAS
+   'submit #edit-auto'(event) {
 
     // Prevent default browser form submit
 
@@ -513,23 +576,41 @@ Template.configdisp.events({
 
     const target = event.target;
 
+    var frecuencia="";
+    var dispositivos ="";
+
+	    //DIAS SELECCIONADOS
+	 $("#edit-auto input.dia:checkbox:checked").each(function() {
+	     
+	      frecuencia = frecuencia+ $(this).attr("name")  + " "  ;
+	});
+
+	 		frecuencia = $.trim(frecuencia);
+	//DIAS SELECCIONADOS
+	 $("#edit-auto input.dispositivo_auto:checkbox:checked").each(function() {
+	     
+	      dispositivos = dispositivos + $(this).attr("name") + " ";
+	});
+	 	dispositivos = $.trim(dispositivos);
+
    
    	
 
     
-	Meteor.call('editdisp',{"id":target.id.value,
+	Meteor.call('editauto',{"id":target.id.value,
 							"nombre":target.nombre.value,
-							"zona":target.zona.value,
-							"tipo":target.tipo.value,		   
-							"icono":target.icono.value,
-							"pin":target.pin.value
-							
-		   					, 
+							"fecha_inicio":target.fecha_inicio.value,
+							"fecha_fin":target.fecha_fin.value,		   
+							"hora_encendido":target.hora_encendido.value,
+							"hora_apagado":target.hora_apagado.value,
+							"frecuencia":frecuencia,
+		   					"dispositivos":dispositivos, 
 							});
+							
 
-	$('.modal').modal('close', "#modal_editar_dispositivo");
+	$('.modal').modal('close', "#modal_editar_auto");
 
-	$('#edit-disp').trigger("reset");
+	$('#edit-auto').trigger("reset");
 
    	Materialize.toast('Editado satisfactoriamente');
 
@@ -548,7 +629,109 @@ Template.configdisp.events({
 	
 
 
-	}
+	},
+	//ELIMINAR DISPOSITIVO
+	'click .eliminar_auto':function(event){
+		
+		var a = event.target.getAttribute("data-id");
+		
+		Meteor.call('eliminar',{id:a});
+		document.getElementById("configdisp_"+a).remove();
+		Materialize.toast('Eliminado satisfactoriamente');
+
+		setTimeout(
+			  function() 
+			  {
+			     $('.toast').hide();
+			 
+			  }, 3000);
+	},
+
+	//MODIFICAR RUTINA
+	'click .editar_auto':function(event){
+		
+		var a = event.target.getAttribute("data-id");
+		Session.set('rutina_editar',a);
+		var rutina = Rutinas.findOne({_id:a});
+
+		$('#edit_nombre_rutina').val(rutina.nombre);
+		$('#edit_nombre_rutina').siblings('label, .prefix').addClass('active');
+		$('#edit_fecha_inicio').val(rutina.fecha_inicio);
+		$('#edit_fecha_fin').val(rutina.fecha_fin);
+		$('#edit_hora_encendido').val(rutina.hora_encendido);
+		$('#edit_hora_apagado').val(rutina.hora_apagado);
+		
+		if(rutina.frecuencia.includes("lunes")){
+			$("#edit_lunes").prop("checked", true);
+		}
+
+		if(rutina.frecuencia.includes("martes")){
+			$("#edit_martes").prop("checked", true);	
+		}
+
+		if(rutina.frecuencia.includes("miercoles")){
+			$("#edit_miercoles").prop("checked", true);
+		}
+
+		if(rutina.frecuencia.includes("jueves")){
+			$("#edit_jueves").prop("checked", true);
+		}
+
+		if(rutina.frecuencia.includes("viernes")){
+			$("#edit_viernes").prop("checked", true);
+		}
+
+		if(rutina.frecuencia.includes("sabado")){
+			$("#edit_sabado").prop("checked", true);
+		}
+
+		if(rutina.frecuencia.includes("domingo")){
+			$("#edit_domingo").prop("checked", true);
+		}
+
+		
+
+
+		//var dsp = Dispositivos.findOne({_id:a});
+		/*$('#edit_nombre').val(dsp.nombre);
+		$('#edit_nombre').siblings('label, .prefix').addClass('active');
+		$('#edit_zona').val(dsp.zona);
+		$('#edit_zona').siblings('label, .prefix').addClass('active');
+		$('#edit_pin').val(dsp.pin);
+		$('#edit_pin').siblings('label, .prefix').addClass('active');
+		$("#edit_id").val(dsp._id);
+		$("#edit_icono").val(dsp.icono).trigger("change");
+		$("#edit_icono").material_select()
+		if (dsp.tipo=="sensor") {
+			$('#edit_sensor').prop("checked", true);
+		} else {
+			$('#edit_actuador').prop("checked", true);
+		}
+		*/
+		$('#boton_modal_editar_auto')[0].click();
+		
+		
+	},
+
+	'change .cambio-estatus': function(event) {
+  var x = event.target.checked;
+  //Session.set("statevalue", x);
+  //console.log(event.target.checked);
+ 
+  var id = event.target.getAttribute("data-id");
+  
+  
+
+  if (x==true) {
+  	//mensaje=event.target.id  + " on";
+  	Meteor.call('cambioestatus', {'id' : id, 'estado' : 'activa'});
+  } else{
+  	Meteor.call('cambioestatus', {'id' : id, 'estado' : 'inactiva'});
+  }
+  //console.log(mensaje)
+  //Dispositivos.update({"_id":id},{$set: {"estado":estado,"update":new Date()}});
+  
+ },
 
 
 
