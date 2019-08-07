@@ -3,6 +3,7 @@ import { Dispositivos } from '../api/dispositivos.js';
 import { Permisos } from '../api/dispositivos.js';
 import { Admin } from '../api/dispositivos.js';
 import { Rutinas } from '../api/dispositivos.js';
+import { Pin } from '../api/dispositivos.js';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Session } from 'meteor/session';
 //import { FlowRouter } from 'meteor/kadira:flow-router';
@@ -37,6 +38,7 @@ Template.body.onCreated(function bodyOnCreated() {
   Meteor.subscribe('permisos');
   Meteor.subscribe('admin');
   Meteor.subscribe('rutinas');
+  Meteor.subscribe('pin');
 
 
 
@@ -141,20 +143,61 @@ Template.configuracion.events({
     // Get value from form element
 
     const target = event.target;
+    console.log(parseInt(target.pin.value));
+    var pin_actual= Pin.find({pin:parseInt(target.pin.value)}).fetch()[0]
+    
+    if (pin_actual.estado=='libre'){
 
-
-	Meteor.call('newdisp',{ "nombre":target.nombre.value,
+    	Meteor.call('newdisp',{ "nombre":target.nombre.value,
 							"zona":target.zona.value,
 							"tipo":target.tipo.value,		   
 							"icono":target.icono.value,
+              "especifico":target.especifico.value,
 							"pin":target.pin.value,
 							"valor":0,
-		   					"unidad":"unidades", 
+		   					"unidad":"unidades",
+		   					"id":pin_actual._id, 
 							});
 
 	
 		$('.modal').modal('close', "#modal_agregar_dispositivo");
-   	Materialize.toast('Agregado satisfactoriamente');
+   		Materialize.toast('Agregado satisfactoriamente');
+   		$('#pin_ocupado').hide();
+   		
+   		$("#new-disp").trigger("reset");
+
+
+    }else{
+
+    	var libre = Pin.find({estado:'libre'},{_id:0,pin:1}).fetch()
+    	var text = "Pin ocupado... Estos ";
+    	for (x in libre){
+    		text += libre[x].pin + ","
+    		//console.log(libre[x].pin)	
+    	}
+    	text = text + " estan libres";
+    	//$('#pin_ocupado').setText("Pin ocupado... Estos "+text+" estan libres");
+    	//$('#pin_ocupado').show();
+    	 //M.toast({html: 'I am a toast!', classes: 'rounded'});
+    	 //$('.modal').modal('close', "#modal_agregar_dispositivo");
+    	//Materialize.toast('Pin ocupado... Estos '+text+' estan libres');
+    	$('#pin_label').attr('data-error', text);  
+    	$('#pin').addClass("invalid");
+    	console.log(text)
+    }
+    //Verificar que pin esta disponible
+    //si esta disponible, agregarlo
+    //si no, devolver un array con la lista de disponibles.
+    /*
+
+    
+    Caracas Avenida Norte, esq.Mijares, Edificio Insbanca, piso 6, oficina 66, Urbanización Altagracia, Distrito Capital (punto de referencia: al lado del Banco Central de Venezuela) 58 2128627723
+
+    */
+
+	<button class="btn light-blue lighten-1" type="submit" name="action" form="new-auto">Guardar
+                      <i class="material-icons right">send</i>
+        </button>
 
 		setTimeout(
 			  function() 
@@ -167,7 +210,7 @@ Template.configuracion.events({
     // Clear form
 
     
-	$("#new-disp").trigger("reset");
+	
 
 	
 	
@@ -237,6 +280,7 @@ Template.principal.events({
   //console.log(event.target.checked);
   var zona=event.target.getAttribute("data-zona");
   var id = event.target.getAttribute("data-id");
+  var esp = event.target.getAttribute("data-especifico");
   var estado;
   var mensaje;
 
@@ -250,7 +294,7 @@ Template.principal.events({
   }
   //console.log(mensaje)
   //Dispositivos.update({"_id":id},{$set: {"estado":estado,"update":new Date()}});
-  Meteor.call('prender', {'ide' : this._id, 'estado' : estado});
+  Meteor.call('prender', {'ide' : id, 'estado' : estado, 'especifico' : esp});
  },
 
 'click .zona':function(event,temp){
@@ -369,6 +413,10 @@ Template.configdisp.helpers({
         return a == b;
     },
 
+    pin() {
+    	return Pin.find();
+    }
+
 });
 
 
@@ -442,6 +490,7 @@ Template.configdisp.events({
     return Dispositivos.find({tipo:"actuador"});
 
   },
+
 
   zonas(){
   		
@@ -524,7 +573,7 @@ Template.configdisp.events({
 	    //DIAS SELECCIONADOS
 		 $("#new-auto input.dia:checkbox:checked").each(function() {
 		     
-		      frecuencia = frecuencia+ $(this).attr("name")  + " "  ;
+		      frecuencia = frecuencia+ $(this).attr("value")  + " "  ;
 		});
 
 		 		frecuencia = $.trim(frecuencia);
@@ -537,8 +586,8 @@ Template.configdisp.events({
 
 	  
 		Meteor.call('newauto',{ "nombre":target.nombre.value,
-								"fecha_inicio":target.fecha_inicio.value,
-								"fecha_fin":target.fecha_fin.value,		   
+								//"fecha_inicio":target.fecha_inicio.value,
+								//"fecha_fin":target.fecha_fin.value,		   
 								"hora_encendido":target.hora_encendido.value,
 								"hora_apagado":target.hora_apagado.value,
 								"frecuencia":frecuencia,
@@ -599,12 +648,10 @@ Template.configdisp.events({
     
 	Meteor.call('editauto',{"id":target.id.value,
 							"nombre":target.nombre.value,
-							"fecha_inicio":target.fecha_inicio.value,
-							"fecha_fin":target.fecha_fin.value,		   
 							"hora_encendido":target.hora_encendido.value,
 							"hora_apagado":target.hora_apagado.value,
 							"frecuencia":frecuencia,
-		   					"dispositivos":dispositivos, 
+		   				"dispositivos":dispositivos, 
 							});
 							
 
@@ -630,13 +677,13 @@ Template.configdisp.events({
 
 
 	},
-	//ELIMINAR DISPOSITIVO
+	//ELIMINAR AUTOMATIZACION
 	'click .eliminar_auto':function(event){
 		
 		var a = event.target.getAttribute("data-id");
 		
-		Meteor.call('eliminar',{id:a});
-		document.getElementById("configdisp_"+a).remove();
+		Meteor.call('eliminarauto',{id:a});
+		document.getElementById("auto_"+a).remove();
 		Materialize.toast('Eliminado satisfactoriamente');
 
 		setTimeout(
@@ -661,31 +708,31 @@ Template.configdisp.events({
 		$('#edit_hora_encendido').val(rutina.hora_encendido);
 		$('#edit_hora_apagado').val(rutina.hora_apagado);
 		
-		if(rutina.frecuencia.includes("lunes")){
+		if(rutina.frecuencia.includes("1")){
 			$("#edit_lunes").prop("checked", true);
 		}
 
-		if(rutina.frecuencia.includes("martes")){
+		if(rutina.frecuencia.includes("2")){
 			$("#edit_martes").prop("checked", true);	
 		}
 
-		if(rutina.frecuencia.includes("miercoles")){
+		if(rutina.frecuencia.includes("3")){
 			$("#edit_miercoles").prop("checked", true);
 		}
 
-		if(rutina.frecuencia.includes("jueves")){
+		if(rutina.frecuencia.includes("4")){
 			$("#edit_jueves").prop("checked", true);
 		}
 
-		if(rutina.frecuencia.includes("viernes")){
+		if(rutina.frecuencia.includes("5")){
 			$("#edit_viernes").prop("checked", true);
 		}
 
-		if(rutina.frecuencia.includes("sabado")){
+		if(rutina.frecuencia.includes("6")){
 			$("#edit_sabado").prop("checked", true);
 		}
 
-		if(rutina.frecuencia.includes("domingo")){
+		if(rutina.frecuencia.includes("7")){
 			$("#edit_domingo").prop("checked", true);
 		}
 

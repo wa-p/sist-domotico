@@ -6,6 +6,7 @@ export const Dispositivos = new Mongo.Collection('dispositivos');
 export const Permisos = new Mongo.Collection('permisos');
 export const Admin = new Mongo.Collection('admin');
 export const Rutinas = new Mongo.Collection('rutinas');
+export const Pin = new Mongo.Collection('pin');
 Contador = new Mongo.Collection('contadorDispositivo');
 
 
@@ -15,9 +16,15 @@ if (Meteor.isServer) {
   var mqtt = require('mqtt'); 
   //var client = mqtt.connect('mqtt://200.8.81.156:1883');
   var client = mqtt.connect('mqtt://localhost:1883');
-  client.subscribe('casa/leds');
+  client.subscribe('actuador');
   client.subscribe('sensor');
+  client.subscribe('rutina');
+  client.subscribe('casa/#');
 
+//casa/config <sensor/actuador> <<ldr/dht>/<led/act>> <pin> <area_casa> <add/rm>  (agregar o eliminar un dispositivo)
+//casa/leds <pin> <on/off> (encender o apagar un led)
+//casa/actuador <pin> <on/off> (encender o apagar)
+//casa/automatico <pin> <area_casa> <led/aire/puerta> <on/off> <horario>
 
 
   Meteor.publish("user",function usersPublication() {
@@ -67,6 +74,11 @@ if (Meteor.isServer) {
 
   });
 
+   Meteor.publish('pin', function pinPublication() {
+
+    return Pin.find();
+
+  });
 
 
    Meteor.methods({
@@ -74,23 +86,35 @@ if (Meteor.isServer) {
         //CONTROLAR FUNCIONES DE ACTUADOR
         prender:function(data) {
         	console.log(data);
-        	Dispositivos.update({_id:data.ide},{$set: {estado:data.estado,update:new Date()}});
+        	Dispositivos.update({pin:data.ide},{$set: {estado:data.estado,update:new Date()}});
             //client.publish(data.topic, data.message);
-            var mensaje = data.ide+" turn "+data.estado;
+            var mensaje = data.ide+" "+data.estado;
+            var m= data.ide +" "+ data.estado;
+            //var esp = Dispositivos.findOne({_id:data.ide})
+            //client.publish('casa/air', m );
+
+            if (data.especifico=='air') {
+              client.publish('casa/air', m );   
+            }else {
+              client.publish('casa/leds', m );
+            }
+           
+            //casa/actuador <data.ide> <data.estado> (encender o apagar)
 
             //##############################################
             //    DEVOLVER AL ESTADO INICIAL               #       
             //    TOPICO="ACTUADOR", MENSAJE="TURN ON/OFF" # 
             //##############################################
-            if (data.estado=="off"){
-              client.publish('casa/leds',"ledcuartoff");  
-            }else if (data.estado=="on"){
-              client.publish('casa/leds',"ledcuarton");  
-            }
-            
+            //if (data.estado=="off"){
+             // client.publish('actuador',mensaje);  
+            //}else if (data.estado=="on"){
+             // client.publish('casa/leds',"ledcuarton");  
+            //}
+            //client.publish('actuador',mensaje);  
+            //client.publish('casa', "mensaje de prueba" );
         },
 
-
+        //ACTUALIZAR ESTADO DE ACTUADORES
 
         //ACTUALIZAR ESTADO DE SENSOR
         cambiarValor:function(data) {
@@ -141,7 +165,38 @@ if (Meteor.isServer) {
 
 
           if (d.tipo=="sensor") {
-              Dispositivos.insert({
+              if (d.tipo=='dht') {
+
+                 var temp = Dispositivos.insert({
+                                   "nombre":d.nombre + "temp",
+                                   "zona":d.zona,
+                                   "tipo":d.tipo,
+                                   "valor":0,
+                                   "unidad":" °C",
+                                   "update":new Date(),
+                                   "icono":d.icono,
+                                   "pin":d.pin,
+                                   "especifico":d.especifico
+                                 });
+
+                  var hum = Dispositivos.insert({
+                                   "nombre":d.nombre + "hum",
+                                   "zona":d.zona,
+                                   "tipo":d.tipo,
+                                   "valor":0,
+                                   "unidad":" %RH",
+                                   "update":new Date(),
+                                   "icono":d.icono,
+                                   "pin":d.pin,
+                                   "especifico":d.especifico
+                                 })
+                  //mensaje para configurar los identificadores ?
+                  //client.publish('casa/config/dht',d.tipo+" "+ d.especifico+" "+d.pin+" "+d.zona +" add");
+                  //client.publish('casa/config/dht',d.tipo+" "+ d.especifico+" "+d.pin+" "+d.zona +" add");
+
+              } else {
+
+                  Dispositivos.insert({
                                    "nombre":d.nombre,
                                    "zona":d.zona,
                                    "tipo":d.tipo,
@@ -149,8 +204,13 @@ if (Meteor.isServer) {
                                    "unidad":"unidades",
                                    "update":new Date(),
                                    "icono":d.icono,
-                                   "pin":d.pin
+                                   "pin":d.pin,
+                                   "especifico":d.especifico
                                  })
+
+                  
+              }
+              
           }else{
 
              Dispositivos.insert({
@@ -160,22 +220,34 @@ if (Meteor.isServer) {
                                    "estado":"off",                                   
                                    "update":new Date(),
                                    "icono":d.icono,
-                                   "pin":d.pin
+                                   "pin":d.pin,
+                                   "especifico":d.especifico
                                  })
 
-          }
+             
 
+          }
+          Pin.update({_id:d.id},{$set: {estado:'ocupado'}});
 
           //HACER LLAMADA A FUNCION DE ACTUALIZAR DATOS EN RPI
-          //client.publish('casa/leds',"ledcuarton");  v
+          //client.publish('sensor',d.tipo +" "+pin+" add");
 
+          client.publish('casa/config',d.tipo+" "+ d.especifico+" "+d.pin+" "+d.zona +" add");
+
+          if (d.tipo=='dht') {
+            client.publish('casa/config/dht',d.pin+" "+hum +" hum");
+            client.publish('casa/config/dht',d.pin+" "+temp +" temp");
+          }
+          //casa/config <d.tipo> <d.especifico> <pin> <d.zona> <add>  (agregar o eliminar un dispositivo)
 
         },
         editdisp:function(d){
           //console.log(getNextID("productid"));
 
+            //var del = Dispositivos.find(_id:d.id)
+            //client.publish('casa/config',del.tipo+" "+ del.especifico+" "+del.pin+" "+del.zona +" rm");
 
-          
+                  
               Dispositivos.update({_id:d.id},
                                     {$set:{
                                        "nombre":d.nombre,
@@ -190,9 +262,15 @@ if (Meteor.isServer) {
                                   });
         
              //HACER LLAMADA A FUNCION DE ACTUALIZAR DATOS EN RPI
-             // client.publish('casa/leds',"ledcuarton");  
+             //eliminar el anterior
+             
+            //casa/config <d.tipo> <d.especifico> <pin> <d.zona> <rm>  (agregar o eliminar un dispositivo)
+            //agregar el nuevo
+            //client.publish('casa/config',d.tipo+" "+ d.especifico+" "+d.pin+" "+d.zona +" add");
+            //casa/config <d.tipo> <d.especifico> <pin> <d.zona> <add>  (agregar o eliminar un dispositivo)
 
-          
+
+                    
 
         },
 
@@ -201,6 +279,12 @@ if (Meteor.isServer) {
           
           var a = Dispositivos.findOne({_id:d.id}).zona;
           console.log("zona a eliminar: "+a);
+          var dsp = Dispositivos.findOne({_id:d.id})
+          //client.publish('casa/config',dsp.zona + " "+dsp.nombre + " off");
+          client.publish('casa/config',dsp.tipo+" "+ dsp.especifico+" "+dsp.pin+" "+dsp.zona +" rm");
+          //casa/config <d.tipo> <d.especifico> <pin> <d.zona> <rm>  (agregar o eliminar un dispositivo)
+          var pin = Pin.update({pin:parseInt(dsp.pin)},{$set:{estado:"libre"}} )
+
           Dispositivos.remove({_id:d.id});
           
           //VERIFICAR QUE AUN QUEDAN DISPOSITIVOS
@@ -210,43 +294,138 @@ if (Meteor.isServer) {
               Permisos.update({},{ $pull: { zona:a} },{ upsert: false, multi: true });
           }
 
+          
+
         },    
 
 
 
+
+/*
+
+LkTHoMzaFt7DgTQNd temp
+pGQDNmwswkQXfpp63 hum
+
+
+
+{ "_id" : "LkTHoMzaFt7DgTQNd", "nombre" : "Sensor temp", "zona" : "cuarto", "tipo" : "sensor", "valor" : "0", "unidad" : "°C", "update" : ISODate("2019-07-01T02:25:59.824Z"), "icono" : "whatshot", "pin" : "2", "especifico" : "dht" }
+{ "_id" : "pGQDNmwswkQXfpp63", "nombre" : "Sensor hum", "zona" : "cuarto", "tipo" : "sensor", "valor" : "0", "unidad" : "%RH", "update" : ISODate("2019-07-01T02:25:59.824Z"), "icono" : "invert_colors", "pin" : "2", "especifico" : "dht" }
+
+
+
+*/
+
+
+         
+
+
+
+
+      //NUEVA AUTOMATIZACION
         newauto: function(d){
           //console.log(d.frecuencia.split(" "));
-          Rutinas.insert({
+          var rutina = Rutinas.insert({
                         nombre:d.nombre,
-                        fecha_inicio:d.fecha_inicio,
-                        fecha_fin:d.fecha_fin,
                         hora_encendido:d.hora_encendido,
                         hora_apagado:d.hora_apagado,
                         frecuencia:d.frecuencia.split(" "),
                         dispositivos:d.dispositivos.split(" ")
                   });
+          
+         //Falta el numero de identificacion del registro en la coleccion rutinas
+          //console.log(d.hora_encendido.split(":")[0] + "  :::: " + d.hora_encendido.split(":")[1]  );
+          var array_dsp = d.dispositivos.split(" ");
+          array_dsp.forEach(function(actual){
+            var dsp = Dispositivos.findOne({_id:actual});
+            //console.log('casa/automatico',dsp.pin+" "+dsp.zona+" "+dsp.especifico+" "+ d.hora_encendido.split(":")[1] +" "+ d.hora_encendido.split(":")[0]+" * * "+ d.frecuencia.replace(/ /g,",") +" on");
+            //console.log('casa/automatico',dsp.pin+" "+dsp.zona+" "+dsp.especifico+" "+ d.hora_apagado.split(":")[1] +" "+ d.hora_apagado.split(":")[0]+" * * "+ d.frecuencia.replace(/ /g,",")+" off");
+            client.publish('casa/automatico',dsp.pin+" "+dsp.zona+" "+dsp.especifico+" "+ d.hora_encendido.split(":")[1] +"/"+ d.hora_encendido.split(":")[0]+"/*/*/"+ d.frecuencia.replace(/ /g,",") +" "+rutina+" add on");
+            client.publish('casa/automatico',dsp.pin+" "+dsp.zona+" "+dsp.especifico+" "+ d.hora_apagado.split(":")[1] +"/"+ d.hora_apagado.split(":")[0]+"/*/*/"+ d.frecuencia.replace(/ /g,",")+" "+rutina+" add off");
+
+          })
+          
         },
 
+        //EDITAR AUTOMATIZACION EXISTENTE
         editauto: function(d){
           //console.log(d.frecuencia.split(" "));
           Rutinas.update({_id:d.id},
                         {$set:{
                           nombre:d.nombre,
-                          fecha_inicio:d.fecha_inicio,
-                          fecha_fin:d.fecha_fin,
                           hora_encendido:d.hora_encendido,
                           hora_apagado:d.hora_apagado,
                           frecuencia:d.frecuencia.split(" "),
                           dispositivos:d.dispositivos.split(" ")
                   }});
+          console.log(d.frecuencia.split(" "));
+
+          //console.log("zona a eliminar: "+a);
+          //var dsp = Dispositivos.findOne({_id:d.id})
+          //client.publish('casa/config',dsp.zona + " "+dsp.nombre + " off");
+         
+
+          client.publish('casa/automatico','rm '+d.id);
+
+          var array_dsp = d.dispositivos.split(" ");
+          array_dsp.forEach(function(actual){
+            var dsp = Dispositivos.findOne({_id:d.idl});
+            //console.log('casa/automatico',dsp.pin+" "+dsp.zona+" "+dsp.especifico+" "+ d.hora_encendido.split(":")[1] +" "+ d.hora_encendido.split(":")[0]+" * * "+ d.frecuencia.replace(/ /g,",") +" on");
+            //console.log('casa/automatico',dsp.pin+" "+dsp.zona+" "+dsp.especifico+" "+ d.hora_apagado.split(":")[1] +" "+ d.hora_apagado.split(":")[0]+" * * "+ d.frecuencia.replace(/ /g,",")+" off");
+            client.publish('casa/automatico',dsp.pin+" "+dsp.zona+" "+dsp.especifico+" "+ d.hora_encendido.split(":")[1] +"/"+ d.hora_encendido.split(":")[0]+"/*/*/"+ d.frecuencia.replace(/ /g,",") +" "+rutina+" add on");
+            client.publish('casa/automatico',dsp.pin+" "+dsp.zona+" "+dsp.especifico+" "+ d.hora_apagado.split(":")[1] +"/"+ d.hora_apagado.split(":")[0]+"/*/*/"+ d.frecuencia.replace(/ /g,",")+" "+rutina+" add off");
+
+          })
+
+
         },
 
+        //CAMBIAR ESTATUS DE ACTIVA A INACTIVA
         cambioestatus: function(d){
           Rutinas.update({_id:d.id},{$set:{estatus:d.estado}});
           // ENVIAR MENSAJE MQTT
           // client.publish('casa/leds',"ledcuarton");  
+          console.log(d.frecuencia.split(" "));
 
-        }  
+        },
+
+
+        // ACTUALIZAR ESTATUS DE ACTUADORES AUTOMATIZADOS
+        cambiaractuador:function(data) {
+          //console.log(data.message2);
+            Dispositivos.update({pin:data.message2},{$set:{estado:data.message1,update:new Date()}});
+        }, 
+
+
+        eliminarauto:function(d){
+          
+          var a = Rutinas.remove({_id:d.id});
+          //console.log("zona a eliminar: "+a);
+          //var dsp = Dispositivos.findOne({_id:d.id})
+          //client.publish('casa/config',dsp.zona + " "+dsp.nombre + " off");
+         
+
+          client.publish('casa/automatico','rm '+d.id);
+          //client.publish('casa/automatico','4 cuarto air 14/19/*/*/6 rm off');
+          //client.publish('casa/automatico','18 sala led 11/19/*/*/6 rm');
+          //client.publish('casa/automatico','18 sala led 14/19/*/*/6 rm off');
+          //client.publish('casa/automatico','24 cocina led 41/18/*/*/6 rm on');
+          //client.publish('casa/automatico','24 cocina led 41/18/*/*/6 rm off');
+        
+          //casa/config <d.tipo> <d.especifico> <pin> <d.zona> <rm>  (agregar o eliminar un dispositivo)
+          //var pin = Pin.update({pin:parseInt(dsp.pin)},{$set:{estado:"libre"}} )
+
+          //Dispositivos.remove({_id:d.id});
+          
+          //VERIFICAR QUE AUN QUEDAN DISPOSITIVOS
+          /*if (Dispositivos.findOne({zona:a}) == null) {
+              console.log("entre al nulo");
+              //ELIMINAR TODOS LOS PERMISOS
+              Permisos.update({},{ $pull: { zona:a} },{ upsert: false, multi: true });
+          }*/
+
+          
+
+        }
 
 
 
@@ -255,20 +434,22 @@ if (Meteor.isServer) {
 
 //RECEPCION DE MENSAJE POR MQTT
 client.on('message', Meteor.bindEnvironment(function (topic, message) {
+
+        switch(topic.toString()) {
+          case 'sensor':
+            var mensaje = message.toString().split(" ");
+            Meteor.call('cambiarValor', {'message1' : mensaje[0], 'message2' : mensaje[1]});
+            break;
+          case 'casa/dispositivo':
+            console.log("entre en la actualizacion")
+            var mensaje = message.toString().split(" ");
+            Meteor.call('cambiaractuador', {'message1' : mensaje[0], 'message2' : mensaje[1]});
+            break;
+          default:
+            console.log("entre en el caso default")
+        } 
   	
-  		if (topic.toString()=='sensor'){
-
-		//console.log("en el sensor " + message)
-		var mensaje = message.toString().split(" ");
-
-		Meteor.call('cambiarValor', {'message1' : mensaje[0], 'message2' : mensaje[1]});
-		//console.log("primero  " +mensaje[0] + "  segundo  "+mensaje[1]);
-
-
-};
-
-
-  console.log(message.toString());
+  		
 
 }));
 

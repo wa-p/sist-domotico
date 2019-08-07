@@ -113,7 +113,7 @@
       <div class="row">
         <div class="col s12">
           <h5 class="white-text">Company Bio</h5>
-          <p class="grey-text text-lighten-4">We are a team of college students working on this project like it's our full time job. Any amount would help support and continue development on this project and is greatly appreciated.</p>
+          <p class="grey-text text-lighten-4">Sistema Domótico para el TEG de la Escuela de Computación de Facultad de Ciencias - UCV</p>
 
 
         </div>
@@ -201,7 +201,7 @@
             
             {{#each zonas}}
 
-                <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal truncate" tabindex="0" data-zona="{{_id}}">{{_id}}</a>
+                <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal truncate" tabindex="0" data-zona="{{_id}}" >{{_id}}</a>
                 </li>
 
             {{/each}}
@@ -244,9 +244,9 @@
                   <label>
                     Off
                     {{# if equals estado "off"}}
-                    <input type="checkbox" data-id={{_id}} data-zona={{zona}} class="switch" >
+                    <input type="checkbox" data-id={{pin}} data-zona={{zona}} class="switch" data-especifico={{especifico}} >
                     {{else}}
-                    <input type="checkbox" data-id={{_id}} data-zona={{zona}} checked class="switch">
+                    <input type="checkbox" data-id={{pin}} data-zona={{zona}}  checked class="switch" data-especifico={{especifico}}>
                     {{/if}}
                     <span class="lever"></span>
                     On
@@ -380,10 +380,11 @@
                 {{#each disp in dispositivos}}
                   {{#if equals disp.zona zona._id}}
 
-                    <li class="collection-item avatar" id="configdisp_{{disp._id}}" style="padding-bottom: 30px;">
+                    <li class="collection-item avatar" id="configdisp_{{disp._id}}" data-pin="{{disp.pin}}" style="padding-bottom: 30px;">
                       <i class="material-icons circle" style="left:0px;" >{{disp.icono}}</i>
                       <span class="title" style="left:-5px;"><b>{{disp.nombre}}</b></span>
                        <p><b>Tipo:</b> {{disp.tipo}} <br>
+                        <b>especifico:</b> {{disp.especifico}} <br>
                        {{#if equals disp.tipo "actuador"}}
                           <b>Estado actual:</b> {{disp.estado}} <br>
                          
@@ -452,7 +453,22 @@
                    </div>
                 </div>
 
-             
+              <div class="input-field col s12">
+                
+                    <select class="icons" name="especifico" id="especifico">
+                      <option value="" disabled selected>Seleccione un tipo especifico</option>
+                      <option value="ldr" >ldr</option>
+                      <option value="dht" >dht</option>
+                      <option value="led" >led</option>
+                      <option value="act" >actuador</option>
+                      <option value="air" >air</option>
+                      <!--option value="" data-icon="/images/.png"></option-->
+                     
+
+                    </select>
+                    <label class="light-blue-text ">Ícono</label>
+                  
+                  </div>
 
                   <div class="input-field col s12">
                 
@@ -499,9 +515,10 @@
                     <div class="col s12">
                       <div class="row">
                         <div class="input-field col s12">
+
+                          <input type="text" id="pin" class="validate" name="pin" required="true">
+                          <label  class="light-blue-text" data-error="Pin ocupado" for="pin" id="pin_label">Pin</label>
                           
-                          <input type="text" id="pin" class="autocomplete" name="pin" required="true">
-                          <label  class="light-blue-text " for="pin">Pin</label>
                         </div>
                       </div>
                     </div>
@@ -714,7 +731,7 @@
 
     
     {{#each rutina in rutinas}}
-    <li class="listaauto">
+    <li class="listaauto" id="auto_{{rutina._id}}">
      
       <div class="collapsible-header"><i class="material-icons {{estatus rutina.estatus}} accent-4">alarm_on</i><b>{{rutina.nombre}}</b></div>
      
@@ -758,21 +775,25 @@
                          
                           </li>
 
-                          <li class="collection-item">
+                          <!--li class="collection-item">
                             <b>Fecha</b>
                             <p>Inicio: {{fecha rutina.fecha_inicio}}</p>
                             <p>Fin: {{ fecha rutina.fecha_fin}}</p>
                          
-                          </li>
+                          </li-->
                     
                         
-                       
-                        {{#each dispositivo in rutina.dispositivos}}
+                       <!--
+                        -->
+                          {{#each dsp in dispositivos}}
+                            {{#each dispositivo in rutina.dispositivos}}
+                                {{#if equals dsp._id dispositivo }}
+                            
                          <li class="collection-item">
                           <b>Dispositivos</b> <br><br>
-                            <i class="material-icons" style="margin-right: 10px;">apps</i> <b> {{dispositivo.nombre}} elemento1 / zonaB: </b> </li> 
-                        
-                          
+                            <i class="material-icons" style="margin-right: 10px;">{{dsp.icono}}</i> <b> {{dsp.nombre}} /  {{dsp.zona}} </b> </li> 
+                              {{/if}}
+                            {{/each}}
                         {{/each}}
                             
                         
@@ -825,7 +846,7 @@
                 <label class="light-blue-text " for="nombre">Nombre</label>
               </div>              
                
-                   <div class="col s12">
+                   <!--div class="col s12">
                       <div class="row">
                         <div class="input-field col s12">
                           
@@ -843,7 +864,7 @@
                           <label  class="light-blue-text active" for="fecha_fin">Fecha Fin</label>
                         </div>
                       </div>
-                    </div>
+                    </div-->
 
                     <div class="col s12">
                       <div class="row">
@@ -873,31 +894,31 @@
                            <br>
                            <br>
                            <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="lunes" id="lunes" />
+                          <input type="checkbox" class="filled-in dia" name="lunes" value="1" id="lunes" />
                           <label for="lunes">lun</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="martes" id="martes"/>
+                          <input type="checkbox" class="filled-in dia" name="martes" value="2" id="martes"/>
                           <label for="martes">mar</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="miercoles" id="miercoles"/>
+                          <input type="checkbox" class="filled-in dia" name="miercoles" value="3" id="miercoles"/>
                           <label for="miercoles">mie</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="jueves" id="jueves"/>
+                          <input type="checkbox" class="filled-in dia" name="jueves" value="4" id="jueves"/>
                           <label for="jueves">jue</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="viernes" id="viernes"/>
+                          <input type="checkbox" class="filled-in dia" name="viernes" value="5" id="viernes"/>
                           <label for="viernes">vie</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="sabado" id="sabado"/>
+                          <input type="checkbox" class="filled-in dia" name="sabado" value="6" id="sabado"/>
                           <label for="sabado">sab</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="domingo" id="domingo"/>
+                          <input type="checkbox" class="filled-in dia" name="domingo" value="7" id="domingo"/>
                           <label for="domingo">dom</label>
                           </div>
 
@@ -969,16 +990,16 @@
   <div id="modal_editar_auto" class="modal" style="max-height: 80%">
     <div class="modal-content">
       
-      <h4>Crear Rutinas</h4>
+      <h4>Editar Rutinas</h4>
          <form class="col s12 edit-auto" id="edit-auto">
             <div class="row">
               <div class="input-field col s12">
-              
+                
                 <input type="text" name="nombre" class="validate" id="edit_nombre_rutina"  />
                 <label class="light-blue-text " for="edit_nombre_rutina">Nombre</label>
               </div>              
                
-                   <div class="col s12">
+                   <!--div class="col s12">
                       <div class="row">
                         <div class="input-field col s12">
                           
@@ -996,7 +1017,7 @@
                           <label  class="light-blue-text active" for="edit_fecha_fin">Fecha Fin</label>
                         </div>
                       </div>
-                    </div>
+                    </div-->
 
                     <div class="col s12">
                       <div class="row">
@@ -1028,33 +1049,37 @@
                            <div class="col s5 l2" >
                             
                            
-                              <input type="checkbox" class="filled-in dia" name="lunes" id="edit_lunes" />
-                        
-                              <label for="edit_lunes">lun</label>
+
+
+                          <input type="checkbox" class="filled-in dia" name="lunes" value="1" id="lunes" />
+                          <label for="lunes">lun</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="martes" id="edit_martes"/>
-                          <label for="edit_martes">mar</label>
+                          <input type="checkbox" class="filled-in dia" name="martes" value="2" id="martes"/>
+                          <label for="martes">mar</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="miercoles" id="edit_miercoles"/>
-                          <label for="edit_miercoles">mie</label>
+                          <input type="checkbox" class="filled-in dia" name="miercoles" value="3" id="miercoles"/>
+                          <label for="miercoles">mie</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="jueves" id="edit_jueves"/>
-                          <label for="edit_jueves">jue</label>
+                          <input type="checkbox" class="filled-in dia" name="jueves" value="4" id="jueves"/>
+                          <label for="jueves">jue</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="viernes" id="edit_viernes"/>
-                          <label for="edit_viernes">vie</label>
+                          <input type="checkbox" class="filled-in dia" name="viernes" value="5" id="viernes"/>
+                          <label for="viernes">vie</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="sabado" id="edit_sabado"/>
-                          <label for="edit_sabado">sab</label>
+                          <input type="checkbox" class="filled-in dia" name="sabado" value="6" id="sabado"/>
+                          <label for="sabado">sab</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="domingo" id="edit_domingo"/>
-                          <label for="edit_domingo">dom</label>
+                          <input type="checkbox" class="filled-in dia" name="domingo" value="7" id="domingo"/>
+                          <label for="domingo">dom</label>
+
+
+                             
                           </div>
 
 
