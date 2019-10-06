@@ -457,16 +457,24 @@
                 
                     <select class="icons" name="especifico" id="especifico">
                       <option value="" disabled selected>Seleccione un tipo especifico</option>
-                      <option value="ldr" >ldr</option>
+                      <!--option value="ldr" >ldr</option>
                       <option value="dht" >dht</option>
                       <option value="led" >led</option>
                       <option value="act" >actuador</option>
                       <option value="air" >air</option>
-                      <!--option value="" data-icon="/images/.png"></option-->
-                     
+                      <option value="" data-icon="/images/.png"></option-->
+
+                            <!--select class="icons" name="especifico" id="especifico">
+                           <option value="" disabled selected>Seleccione un tipo especifico</option-->
+                            {{#each tipodispos }}
+                           
+
+                            {{/each}}
+                    
+                               
 
                     </select>
-                    <label class="light-blue-text ">Ícono</label>
+                    <label class="light-blue-text ">Tipo específico</label>
                   
                   </div>
 

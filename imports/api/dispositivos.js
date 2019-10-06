@@ -7,6 +7,7 @@ export const Permisos = new Mongo.Collection('permisos');
 export const Admin = new Mongo.Collection('admin');
 export const Rutinas = new Mongo.Collection('rutinas');
 export const Pin = new Mongo.Collection('pin');
+export const TipoDisp = new Mongo.Collection('tipodispositivo');
 Contador = new Mongo.Collection('contadorDispositivo');
 
 
@@ -77,6 +78,12 @@ if (Meteor.isServer) {
    Meteor.publish('pin', function pinPublication() {
 
     return Pin.find();
+
+  });
+
+    Meteor.publish('tipodispositivo', function tipoDispPublication() {
+
+    return TipoDisp.find();
 
   });
 

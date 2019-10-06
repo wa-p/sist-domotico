@@ -4,6 +4,7 @@ import { Permisos } from '../api/dispositivos.js';
 import { Admin } from '../api/dispositivos.js';
 import { Rutinas } from '../api/dispositivos.js';
 import { Pin } from '../api/dispositivos.js';
+import { TipoDisp } from '../api/dispositivos.js';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Session } from 'meteor/session';
 //import { FlowRouter } from 'meteor/kadira:flow-router';
@@ -17,12 +18,6 @@ clientZona = new Mongo.Collection('clientZona');
 //CLAVE SERVIDOR HEREDADA   AIzaSyBp_rnlPVcQhAuqTFGMZVa6gZFoIAX3z-E
 
 // SENDER ID    1007820131851
-
-
-Template.file.onRendered(function () {
-        $('#file_download').trigger("click");
-      });
-
 
 
 
@@ -39,6 +34,7 @@ Template.body.onCreated(function bodyOnCreated() {
   Meteor.subscribe('admin');
   Meteor.subscribe('rutinas');
   Meteor.subscribe('pin');
+  Meteor.subscribe('tipodispositivo');
 
 
 
@@ -415,6 +411,24 @@ Template.configdisp.helpers({
 
     pin() {
     	return Pin.find();
+    },
+
+    tipodispos(){
+       var array = TipoDisp.find().fetch()
+
+      for (var i = 0; i < array.length; i+=1) {
+        //console.log("En el índice '" + i + "' hay este valor: " + array[i].valor);
+        
+        $('#especifico').append("<option value='"+array[i].valor+"'>"+array[i].valor+"</option>");
+      }
+    $('select').material_select();
+      //var opt = document.createElement('option');
+    //opt.value = i;
+    //opt.innerHTML = i;
+    //select.appendChild(opt);
+
+      return TipoDisp.find({}).fetch();
+
     }
 
 });
