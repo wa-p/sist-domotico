@@ -1,3 +1,4 @@
+import { Tracker } from 'meteor/tracker'
 import { Template } from 'meteor/templating';
 import { Dispositivos } from '../api/dispositivos.js';
 import { Permisos } from '../api/dispositivos.js';
@@ -5,13 +6,18 @@ import { Admin } from '../api/dispositivos.js';
 import { Rutinas } from '../api/dispositivos.js';
 import { Pin } from '../api/dispositivos.js';
 import { TipoDisp } from '../api/dispositivos.js';
+import { Programas } from '../api/dispositivos.js';
 import { ReactiveDict } from 'meteor/reactive-dict';
 import { Session } from 'meteor/session';
+import { Alerta } from '../api/dispositivos.js';
+import { Historico } from '../api/dispositivos.js';
 //import { FlowRouter } from 'meteor/kadira:flow-router';
 import './bodys.html';
 import '../../client/layouts/MainLayout.html';
 
 clientZona = new Mongo.Collection('clientZona');
+
+
 
 // CLAVE SERVIDOR      AAAA6qbCzgs:APA91bGmxq_pVmXoT2c0m_D-10eBne0nAsKihtrc4ZqAv-s_zLiqfpUGf-OOL6pvvKHOUGDN2L607TpffGfI-thzV4ji_abmpdgZGSdty3xSP1nyDyvXJDUhr9EUo9diBN-wnzvjJ5MT
 
@@ -35,11 +41,43 @@ Template.body.onCreated(function bodyOnCreated() {
   Meteor.subscribe('rutinas');
   Meteor.subscribe('pin');
   Meteor.subscribe('tipodispositivo');
-
-
+  Meteor.subscribe('aires');
+  Meteor.subscribe('programas');
+  Meteor.subscribe('alertas');
+  Meteor.subscribe('eventos');
 
 
 });
+
+Tracker.autorun(function () {
+      var flama = Alerta.findOne({tipo:"flama"});
+      var movimiento = Alerta.findOne({tipo:"movimiento"});
+        if( movimiento ) {
+          // Execute a modal popup or something - make sure to pass the current value.
+          // Call a meteor method to remove the notification.
+          
+          $( ".light-blue" ).removeClass( "light-blue" ).addClass( "red" );
+                 
+          $('#modalwarning').modal('open');
+        }else{
+
+          $( ".red" ).removeClass( "red " ).addClass( "light-blue" ); 
+        };
+
+        //SECCION FLAMA
+        if (flama) {
+          $('#fuego_'+flama.zona).addClass('blink');
+          $('#fuego_'+flama.zona).css("display","inline");
+          Materialize.toast('Alerta de FLAMA en '+flama.zona); 
+
+        }else{
+          $('.toast').hide();
+          $('.fuego_icon').removeClass('blink');
+          $('.fuego_icon').css("display","none");
+        };
+
+
+   });
 
 
 Template.bodys.helpers({
@@ -50,14 +88,38 @@ Template.bodys.helpers({
     	}else{
     		return false;
     	}
+    },
+
+
+  programas() {
+
+    return Programas.findOne({nombre:"seguridad"})
+
+  },
+
+  equals: function(a, b) {
+        return a == b;
+    },
+
+    alertas() {
+    var notification = Alerta.findOne();
+    if( notification ) {
+      // Execute a modal popup or something - make sure to pass the current value.
+      // Call a meteor method to remove the notification.
+      alert("body")
     }
-})
+  },
+
+   
+
+});
 
  Template.bodys.onRendered(function () {
         
         $('.collapsible').collapsible();
         $('.sidenav').sidenav();
-
+        $('.modal').modal();
+        $('.tap-target').tapTarget();
         
         
       }); 
@@ -66,7 +128,26 @@ Template.bodys.helpers({
        'click .side-nav li > a':function(e){
        		
        	$('.button-collapse').trigger("click");
-       } 
+       },
+
+        'click .icono_seguridad':function(e){
+
+          Meteor.call('cambiarseguridad',{});
+          
+          if(Programas.findOne({nombre:"seguridad"}).estado == "off"){
+              Materialize.toast('Se ha activado la seguridad');    
+          }else{
+            Materialize.toast('Se ha desactivado la seguridad');
+          }
+
+          setTimeout(
+        function() 
+        {
+           $('.toast').hide();
+       
+        }, 3000);
+        
+       }  
        
 
         
@@ -121,7 +202,17 @@ Template.principal.helpers({
     data: function() {
         var paramsStatus = Router.current().params._status;
         return paramsStatus;
+    },
+
+     alertas() {
+    var notification = Alerta.findOne();
+    if( notification ) {
+      // Execute a modal popup or something - make sure to pass the current value.
+      // Call a meteor method to remove the notification.
+      alert("body")
     }
+  }
+
 
 });
 
@@ -305,14 +396,25 @@ Template.principal.events({
 		Session.set('zona_actual',a);
 	
 	}
-			console.log(event.target);
+			//console.log(event.target);
 			$('a').removeClass("active");
             $(event.target).addClass("active");
 	//console.log(event.target.getAttribute("data-zona") +" zona evento" )
 	
 
 
-}
+},
+
+'click .cambiar':function(event){
+  var id = event.target.getAttribute("data-id");
+  var accion = event.target.getAttribute("data-accion");
+   
+        Meteor.call('cambiartempaire', {'id' : id, 'accion': accion });
+   
+    
+  },
+
+  
 
 
 });
@@ -799,4 +901,102 @@ Template.configdisp.events({
 
 
   
+});
+
+
+//****************
+//CONFIGURACION DE AIRES
+//R*******************
+
+Template.configaires.helpers({
+
+    tipodispos(){     
+
+      return TipoDisp.find();
+
+  },
+
+  aires(){
+    return Dispositivos.find({'especifico':'air'})
+  },
+
+   equals: function(a, b) {
+        return a == b;
+      }
+
+});
+
+
+Template.configaires.events({
+
+  'change .controltemp-estatus': function(event) {
+  var x = event.target.checked;
+  //Session.set("statevalue", x);
+  //console.log(event.target.checked);
+ 
+  var id = event.target.getAttribute("data-id"); 
+  
+
+  if (x==true) {
+    //mensaje=event.target.id  + " on";
+    Meteor.call('controltempestatus', {'id' : id, 'estado' : 'activa'});
+  } else{
+    Meteor.call('controltempestatus', {'id' : id, 'estado' : 'inactiva'});
+  }
+  //console.log(mensaje)
+  //Dispositivos.update({"_id":id},{$set: {"estado":estado,"update":new Date()}});
+  
+ },
+
+ 'click .cambiar':function(event){
+  var id = event.target.getAttribute("data-id");
+  var accion = event.target.getAttribute("data-accion");
+   
+        Meteor.call('controltempvalor', {'id' : id, 'accion': accion });
+   
+    
+  },
+
+});
+
+
+//###########################
+//    TEMPLATE GENERAL
+//###########################
+
+Template.geneventos.helpers({
+
+  eventos(){
+    return  Historico.find({tipo:"flama"}); 
+  },
+
+  fecha(f){
+    date = new Date(f);
+    return date.toLocaleString();
+  }
+
+});
+
+
+/*
+
+ $project : {
+                sensor: "$nombre",
+                avg : {$avg : "$fecha.valor"}
+            }
+
+*/
+
+Template.genhumedad.helpers({
+  
+  humedad() {
+
+  return Historico.find({tipo:"sensor"}); 
+  },
+
+  fecha(f){
+    date = new Date(f);
+    return date.toLocaleString();
+  }
+
 });

@@ -8,10 +8,80 @@ export const Admin = new Mongo.Collection('admin');
 export const Rutinas = new Mongo.Collection('rutinas');
 export const Pin = new Mongo.Collection('pin');
 export const TipoDisp = new Mongo.Collection('tipodispositivo');
+export const Programas = new Mongo.Collection('programas');
+export const Historico = new Mongo.Collection('historico');
 Contador = new Mongo.Collection('contadorDispositivo');
-
+export const Alerta = new Mongo.Collection('alerta');
 
 if (Meteor.isServer) {
+
+  //INTERVALO CADA HORA (3600000) PARA ACTUALIZAR LOS REGISTROS Y LOS PROMEDIOS
+  Meteor.startup(function () {
+    Meteor.setInterval(() => {
+
+      
+
+      Dispositivos.find({tipo:"sensor"}).forEach( function(dsp) { 
+          //console.log("primer find")
+          //Historico.update({id:dsp._id,nombre:dsp.nombre,zona:dsp.zona,tipo:"sensor",especifico:dsp.especifico,pin:dsp.pin,icono:dsp.icono},{$push:{fecha:{fecha:dsp.update,valor:parseFloat(dsp.valor)}}},{upsert:true})
+
+        Historico.find({nombre:dsp.nombre}).forEach(function(val){
+          //console.log("segundo find")
+          var cont_t= 0, cont_a= 0, cont_m= 0, cont_s= 0, cont_h = 0;
+          var sum_t= 0, sum_a= 0, sum_m= 0, sum_s= 0, sum_h = 0;
+          var avg_t, avg_a, avg_m, avg_s, avg_h = 0;
+          
+          val.fecha.forEach(function(prom){
+            //PROMEDIO TOTAL
+            sum_t += prom.valor;
+            cont_t++;          
+
+            //PROMEDIO ANNO
+            if(prom.fecha >= new Date(new Date().getTime() - (365 * 24 * 60 * 60 * 1000))){
+                sum_a += prom.valor;
+                cont_a++;      
+            };
+
+            //PROMEDIO MES
+            if(prom.fecha >= new Date(new Date().getTime() - (30 * 24 * 60 * 60 * 1000))){
+                sum_m += prom.valor;
+                cont_m++;      
+            };
+
+            //PROMEDIO SEMANA
+            if(prom.fecha >= new Date(new Date().getTime() - (8 * 24 * 60 * 60 * 1000))){
+                sum_s += prom.valor;
+                cont_s++;      
+            };
+
+            //PROMEDIO DIA
+            if(prom.fecha >= new Date(new Date().getTime() - (24 * 60 * 60 * 1000))){
+                sum_h += prom.valor;
+                cont_h++;      
+            }
+
+            
+          })
+
+          if (cont_t==0) { cont_t=1};
+          if (cont_a==0) { cont_a=1};
+          if (cont_m==0) { cont_m=1};
+          if (cont_s==0) { cont_s=1};
+          if (cont_h==0) { cont_h=1};
+          
+          //console.log(dsp.nombre +"   "+sum_t + " "+cont_t)
+          //console.log(val.nombre + "  avg "+sum/cont);
+          //console.log("update")
+          Historico.update({id:dsp._id,nombre:dsp.nombre,zona:dsp.zona,tipo:"sensor",especifico:dsp.especifico,pin:dsp.pin,icono:dsp.icono},{$set:{avg_total:sum_t/cont_t,avg_anno:sum_a/cont_a,avg_mes:sum_m/cont_m, avg_semana:sum_s/cont_s, avg_hoy:sum_h/cont_h}},{upsert:true}) 
+         
+        })  
+      })  
+
+          
+       
+      //EQUIV A 1 HORA  3600000
+    }, 60000);
+  });
 
   // This code only runs on the server
   var mqtt = require('mqtt'); 
@@ -22,10 +92,21 @@ if (Meteor.isServer) {
   client.subscribe('rutina');
   client.subscribe('casa/#');
 
+
+
+
+  
 //casa/config <sensor/actuador> <<ldr/dht>/<led/act>> <pin> <area_casa> <add/rm>  (agregar o eliminar un dispositivo)
 //casa/leds <pin> <on/off> (encender o apagar un led)
 //casa/actuador <pin> <on/off> (encender o apagar)
 //casa/automatico <pin> <area_casa> <led/aire/puerta> <on/off> <horario>
+//users.update({_id: "onYRvK4yfyDb8GEBH"}, {$set: {"profile.casa": ObjectId("5d9e85a891266a8e71627edb")});
+
+Meteor.publish('alertas', function alertasPublication() {
+    //var a = Meteor.user().profile.casa
+    //return Dispositivos.find({"casa":a});
+    return Alerta.find()
+  });
 
 
   Meteor.publish("user",function usersPublication() {
@@ -64,9 +145,12 @@ if (Meteor.isServer) {
 
 
    Meteor.publish('dispositivos', function dispositivosPublication() {
+    //var a = Meteor.user().profile.casa
 
-    return Dispositivos.find();
+    
 
+    //return Dispositivos.find({"casa":a});
+    return Dispositivos.find()
   });
 
    Meteor.publish('rutinas', function rutinasPublication() {
@@ -85,6 +169,22 @@ if (Meteor.isServer) {
 
     return TipoDisp.find();
 
+  });
+
+    Meteor.publish("aires",function airessPublication() {
+    // body...
+    return Dispositivos.find({especifico:"air"})
+  });
+
+
+    Meteor.publish("programas",function programasPublication() {
+    // body...
+    return Programas.find()
+  });
+
+     Meteor.publish("eventos",function eventosPublication() {
+    // body...
+    return Historico.find()
   });
 
 
@@ -172,7 +272,7 @@ if (Meteor.isServer) {
 
 
           if (d.tipo=="sensor") {
-              if (d.tipo=='dht') {
+              if (d.especifico=='dht') {
 
                  var temp = Dispositivos.insert({
                                    "nombre":d.nombre + "temp",
@@ -183,8 +283,11 @@ if (Meteor.isServer) {
                                    "update":new Date(),
                                    "icono":d.icono,
                                    "pin":d.pin,
-                                   "especifico":d.especifico
+                                   "especifico":d.especifico,
+                                   "casa":Meteor.user().profile.casa
                                  });
+
+                   
 
                   var hum = Dispositivos.insert({
                                    "nombre":d.nombre + "hum",
@@ -195,15 +298,20 @@ if (Meteor.isServer) {
                                    "update":new Date(),
                                    "icono":d.icono,
                                    "pin":d.pin,
-                                   "especifico":d.especifico
-                                 })
+                                   "especifico":d.especifico,
+                                   "casa":Meteor.user().profile.casa
+                                 });
+
+                  // result.insertedId.toString() ;
+
+
                   //mensaje para configurar los identificadores ?
                   //client.publish('casa/config/dht',d.tipo+" "+ d.especifico+" "+d.pin+" "+d.zona +" add");
                   //client.publish('casa/config/dht',d.tipo+" "+ d.especifico+" "+d.pin+" "+d.zona +" add");
 
               } else {
 
-                  Dispositivos.insert({
+                  var air = Dispositivos.insert({
                                    "nombre":d.nombre,
                                    "zona":d.zona,
                                    "tipo":d.tipo,
@@ -212,8 +320,13 @@ if (Meteor.isServer) {
                                    "update":new Date(),
                                    "icono":d.icono,
                                    "pin":d.pin,
-                                   "especifico":d.especifico
-                                 })
+                                   "especifico":d.especifico,
+                                   "casa":Meteor.user().profile.casa
+                                   
+                                 });
+                  if (d.especifico=="air") {
+                    Dispositivos.update({"_id":air},{$set:{"tempactual":20,"controltemp.temperatura":20,"controltemp.estatus":"inactiva"}})
+                  }
 
                   
               }
@@ -228,7 +341,8 @@ if (Meteor.isServer) {
                                    "update":new Date(),
                                    "icono":d.icono,
                                    "pin":d.pin,
-                                   "especifico":d.especifico
+                                   "especifico":d.especifico,
+                                   "casa":Meteor.user().profile.casa
                                  })
 
              
@@ -239,9 +353,9 @@ if (Meteor.isServer) {
           //HACER LLAMADA A FUNCION DE ACTUALIZAR DATOS EN RPI
           //client.publish('sensor',d.tipo +" "+pin+" add");
 
-          client.publish('casa/config',d.tipo+" "+ d.especifico+" "+d.pin+" "+d.zona +" add");
+          client.publish('casa/config',d.tipo+" "+ d.especifico+" "+d.pin+" "+d.zona +" add "+d.id);
 
-          if (d.tipo=='dht') {
+          if (d.especifico=='dht') {
             client.publish('casa/config/dht',d.pin+" "+hum +" hum");
             client.publish('casa/config/dht',d.pin+" "+temp +" temp");
           }
@@ -399,7 +513,10 @@ pGQDNmwswkQXfpp63 hum
         // ACTUALIZAR ESTATUS DE ACTUADORES AUTOMATIZADOS
         cambiaractuador:function(data) {
           //console.log(data.message2);
-            Dispositivos.update({pin:data.message2},{$set:{estado:data.message1,update:new Date()}});
+            //Dispositivos.update({pin:data.message1},{$set:{estado:data.message2,update:new Date()}});
+            console.log(Dispositivos.findOne({_id:data.message1}).estado)
+             Dispositivos.update({_id:data.message1},{$set:{estado:data.message2,update:new Date()}});
+             console.log(Dispositivos.findOne({_id:data.message1}).estado)
         }, 
 
 
@@ -432,6 +549,54 @@ pGQDNmwswkQXfpp63 hum
 
           
 
+        },
+        //MODIFICAR VALOR DE TEMPEATURA OBJETIVO DEL AIRE
+        cambiartempaire:function(d){
+
+          if(d.accion == "subir"){
+              Dispositivos.update({_id:d.id},{$inc:{tempactual:1}});
+          }else if(d.accion == "bajar"){
+              Dispositivos.update({_id:d.id},{$inc:{tempactual:-1}});
+          }
+
+          //FALTA ENVIAR MENSAJE MQTT
+
+        },
+        controltempvalor:function(d){
+
+          if(d.accion == "subir"){
+              Dispositivos.update({_id:d.id},{$inc:{"controltemp.temperatura":1}});
+          }else if(d.accion == "bajar"){
+              Dispositivos.update({_id:d.id},{$inc:{"controltemp.temperatura":-1}});
+          }
+
+          //FALTA ENVIAR MENSAJE MQTT
+
+        },
+
+
+        //MODIFICAR ESTATUS DE FUNCIONAMIENTO DE ACTIVACION AUTOMATICA DEL AIRE DADA UNA TEMPERATURA
+        controltempestatus:function(d){
+
+           Dispositivos.update({_id:d.id},{$set:{"controltemp.estatus":d.estado}});
+          // FALTA ENVIAR MENSAJE MQTT
+          
+        },
+
+        cambiarseguridad:function(d){
+
+          var estado = Programas.findOne({nombre:"seguridad"}).estado;
+
+          if (estado=="off") {
+              Programas.update({nombre:"seguridad"},{$set:{"estado":"on"}});
+              client.publish('casa/seguridad',"20 on");
+
+              
+          } else {
+              Programas.update({nombre:"seguridad"},{$set:{"estado":"off"}});
+              client.publish('casa/seguridad',"20 off");
+              Alerta.remove({tipo:"movimiento"});
+          }
         }
 
 
@@ -447,16 +612,45 @@ client.on('message', Meteor.bindEnvironment(function (topic, message) {
             var mensaje = message.toString().split(" ");
             Meteor.call('cambiarValor', {'message1' : mensaje[0], 'message2' : mensaje[1]});
             break;
+
           case 'casa/dispositivo':
             console.log("entre en la actualizacion")
             var mensaje = message.toString().split(" ");
             Meteor.call('cambiaractuador', {'message1' : mensaje[0], 'message2' : mensaje[1]});
             break;
+
+          case 'casa/seguridad':
+            var mensaje =  message.toString().split(" ");
+              if ( mensaje[1]=="alerta" && Programas.findOne({nombre:"seguridad",estado:"on"})) {
+                console.log("ALERTA DE INTRUSO")
+                Alerta.insert({tipo:"movimiento",activacion:new Date()});
+                Historico.update({tipo:"movimiento",zona:"zona_x"},{$push:{fecha:{fecha:new Date()}}},{upsert:true})
+                //Historico.insert({tipo:"movimiento",zona:"zona_x",fecha:new Date()});
+              }
+              break;
+
+          case 'casa/flama':
+          //me avisa que hay flama pero no verifico la veracidad del valor del id
+            console.log("ALERTA DE FLAMA")
+            var mensaje = message.toString().split(" ");
+            if(mensaje[1] == "on"){
+              Meteor.call('cambiarValor', {'message1' : mensaje[0], 'message2' : mensaje[1]});
+              Alerta.insert({tipo:"flama",zona:Dispositivos.findOne({_id:mensaje[0]}).zona,activacion:new Date()});
+              Historico.update({tipo:"flama",zona:Dispositivos.findOne({_id:mensaje[0]}).zona},{$push:{fecha:{fecha:new Date()}}},{upsert:true})
+
+              //Historico.insert({tipo:"flama",zona:Dispositivos.findOne({_id:mensaje[0]}).zona,fecha:new Date()});
+            }else if( mensaje[1] == 'off'){
+              Meteor.call('cambiarValor', {'message1' : mensaje[0], 'message2' : mensaje[1]});
+              Alerta.remove({tipo:"flama"});
+            }
+            
+            break;
+
           default:
             console.log("entre en el caso default")
         } 
   	
-  		
+  		//zvD5GuNE2539osYNE sensor llama
 
 }));
 

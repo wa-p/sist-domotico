@@ -1,6 +1,21 @@
 
 <template name='bodys'>
 
+<div id="modalwarning" class="modal" >
+    <div class="modal-content">
+      <h3 class="flashit center">ALERTA</h3>      
+    </div>
+  </div>
+
+  <!--a id="menuxxx" class="waves-effect waves-light btn btn-floating" ><i class="material-icons">menu</i></a>
+
+  < Tap Target Structure >
+  <div class="tap-target" data-target="menuxxx">
+    <div class="tap-target-content">
+      <h5>Title</h5>
+      <p>A bunch of text</p>
+    </div>
+  </div-->
 
 <body>
 
@@ -32,7 +47,8 @@
           {{#if currentUser}}
             <li><a href="/">Controles</a></li>
             {{#if admin currentUser._id}}
-            <li><a href="#">General</a></li>
+            <li><a href="#!" class="icono_seguridad waves-effect waves-light pulse"><i class="material-icons" id="icono_seguridad_w">{{#if equals programas.estado "on" }}lock{{else}}lock_open{{/if}}</i></a></li>
+            <li><a href="/general">General</a></li>
             <li><a href="/config" id="configuracion">Configuración</a></li>
 
             {{/if}}
@@ -50,6 +66,7 @@
           {{#if currentUser}}
             <li><a href="/">Controles <i class="material-icons">apps</i></a></li>
             {{#if admin currentUser._id}}
+            <li><a href="#!" class="icono_seguridad">{{#if equals programas.estado "on" }}Seguridad activa{{else}}Seguridad Desactivada{{/if}}<i class="material-icons" id="icono_seguridad_m">{{#if equals programas.estado "on" }}lock{{else}}lock_open{{/if}}</i></a></li>
             <li><a href="#">General <i class="material-icons">multiline_chart</i></a></li>
             <li><a href="/config" id="configuracion">Configuración <i class="material-icons">settings</i></a></li>
             {{/if}}
@@ -113,7 +130,7 @@
       <div class="row">
         <div class="col s12">
           <h5 class="white-text">Company Bio</h5>
-          <p class="grey-text text-lighten-4">Sistema Domótico para el TEG de la Escuela de Computación de Facultad de Ciencias - UCV</p>
+          <p class="grey-text text-lighten-4">Sistema Domótico como TEG de la Escuela de Computación de Facultad de Ciencias - UCV</p>
 
 
         </div>
@@ -139,7 +156,7 @@
     </div>
     <div class="footer-copyright">
       <div class="container">
-      Made by <a class="orange-text text-lighten-3" href="http://materializecss.com">Materialize</a>
+      Made with <a class="orange-text text-lighten-3" href="http://materializecss.com">Materialize</a>
       </div>
     </div>
   </footer>
@@ -189,6 +206,26 @@
 
 
 <template name='principal'>
+
+  <style type="text/css">
+    
+    .blink {
+      animation: blink 2s steps(5, start) infinite;
+      -webkit-animation: blink 1s steps(5, start) infinite;
+    }
+    @keyframes blink {
+      to {
+        visibility: hidden;
+      }
+    }
+    @-webkit-keyframes blink {
+      to {
+        visibility: hidden;
+      }
+    }
+  </style>
+
+
   <div class="row">
       <div class="col s12 m2">
         
@@ -201,7 +238,7 @@
             
             {{#each zonas}}
 
-                <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal truncate" tabindex="0" data-zona="{{_id}}" >{{_id}}</a>
+                <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal truncate" tabindex="0" data-zona="{{_id}}">{{_id}}<i id="fuego_{{_id}}" class="big material-icons right fuego_icon" style="display: none; color:red">whatshot</i></a>
                 </li>
 
             {{/each}}
@@ -239,7 +276,7 @@
    <div class="col s12 m4">
           <div class="icon-block">
             <h2 class="center light-blue-text"><i class="medium material-icons">{{icono}}</i></h2>
-            <h5 class="center">{{nombre}}</h5>
+            <h5 class="center">{{nombre}} {{#if equals especifico "air"}} {{tempactual}} °C {{/if}}</h5>
                 <div class="switch center">
                   <label>
                     Off
@@ -251,6 +288,19 @@
                     <span class="lever"></span>
                     On
                   </label>
+                  <br>
+                  <br>
+                  {{# if equals especifico "air"}}
+                  <a class="btn-floating btn-small waves-effect waves-light light-blue"><i class="material-icons cambiar" data-id="{{_id}}" data-accion="bajar">remove</i></a>
+                    <a class="btn-floating btn-small waves-effect waves-light light-blue" ><i class="material-icons cambiar" data-id="{{_id}}" data-accion="subir">add</i></a>
+                    
+
+                    {{else}}
+
+                    <a class="btn-flat btn-small white"><i class="material-icons"></i></a>
+                    <a class="btn-flat btn-small white"><i class="material-icons"></i></a>
+
+                    {{/if}}
                 </div>
             
           </div>
@@ -260,10 +310,28 @@
 {{else}}
    <div class="col s12 m4">
           <div class="icon-block">
-            <h2 class="center light-blue-text"><i class=" medium material-icons">{{icono}}</i></h2>
+            <h2 class="center light-blue-text"><i class=" medium material-icons" id="icono_{{_id}}">{{icono}}</i></h2>
             <h5 class="center">{{nombre}} </h5>
-            <h5 class="center">{{valor}} {{unidad}}</h5>
-
+            <h5 class="center">  {{# if equals especifico "ldr"}}
+                                        {{# if equals valor "LOW.OSCURO"}} 
+                                            Muy oscuro 
+                                        {{/if}}
+                                        {{# if equals valor "HIGH.OSCURO"}} 
+                                            Oscuro
+                                        {{/if}}
+                                        {{# if equals valor "LOW.LUZ"}} 
+                                            Claro 
+                                        {{/if}} 
+                                        {{# if equals valor "HIGH.LUZ"}} 
+                                            Muy claro
+                                        {{/if}}      
+                                  {{else}} 
+                                        {{valor}} {{unidad}} 
+                                  {{/if}}</h5>
+            <br>
+            <br>
+            <a class="btn-flat btn-small white"><i class="material-icons"></i></a>
+            <a class="btn-flat btn-small white"><i class="material-icons"></i></a>
            
           </div>
         </div>
@@ -286,6 +354,14 @@
 
   
   </div>
+
+
+  <style type="text/css">
+    
+    .switch label input[type="checkbox"]:checked + .lever, .switch label input[type="checkbox"]:checked + .lever::after {
+        background-color: #ff9800 !important
+    }
+  </style>
   
 </template>
 
@@ -305,6 +381,8 @@
                  <li class="bold config" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-config="configpermiso" href="/config/permiso">Permisos</a>
                 </li>
                  <li class="bold config" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-config="config-auto" href="/config/auto">Automatizacion</a>
+                </li>
+                <li class="bold config" ><a class="collapsible-header waves-effect waves-teal" tabindex="0" data-config="config-aires" href="/config/aires">Aires</a>
                 </li>
             
            
@@ -468,9 +546,9 @@
                            <option value="" disabled selected>Seleccione un tipo especifico</option-->
                             {{#each tipodispos }}
                            
-
-                            {{/each}}
-                    
+                              <option value="{{valor}}" >{{valor}}</option>
+                                
+                        {{/each}}
                                
 
                     </select>
@@ -1171,6 +1249,109 @@
 </template>
 
 
+
+
+<template name="configaires">
+  <h4>Configuracion Aires</h4>
+
+   
+  <br>
+                        
+
+    <ul class="collapsible">
+
+    
+    {{#each aires}}
+    <li class="listaauto" >
+     
+      <div class="collapsible-header"><i class="material-icons accent-4">{{icono}}</i><b>{{zona}} / {{nombre}}</b></div>
+     
+
+      <div class="collapsible-body">
+        
+
+
+              <ul class="collection">
+
+                <div class="switch center">
+                    <p>Estatus</p>
+                    <label>
+                      Inactiva
+                      {{# if equals controltemp.estatus "inactiva"}}
+                      <input type="checkbox" data-id={{_id}}  class="switch controltemp-estatus" >
+                      
+                      {{else}}
+                      <input type="checkbox" data-id={{_id}} checked class="switch controltemp-estatus">
+                      
+                      {{/if}}
+                      <span class="lever"></span>
+                      Activa
+                    </label>
+                  </div>
+
+                          <li class="collection-item">
+                             
+                          </li>
+                
+                           <li class="collection-item center">
+                            <b>Temperatura</b>
+                            <p>
+                              <a class="btn-floating btn-small waves-effect waves-light light-blue"><i class="material-icons cambiar" data-id="{{_id}}" data-accion="bajar">remove</i></a>
+                              {{controltemp.temperatura}}
+                              <a class="btn-floating btn-small waves-effect waves-light light-blue" ><i class="material-icons cambiar" data-id="{{_id}}" data-accion="subir">add</i></a> 
+                            </p>
+                         
+                          </li>
+
+                            
+                        
+                          
+                 
+              
+                
+              </ul>
+                        
+
+
+
+
+      </div>
+    </li>
+
+    {{/each}}
+    
+    
+
+
+
+    
+
+
+
+
+   
+    
+  </ul>
+
+  
+
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('.collapsible').collapsible();
+  });
+</script>
+
+<style type="text/css">
+  .tabs .indicator{
+    background-color:#03a9f4;
+  }
+</style>
+ 
+   
+</template>
+
+
 <!--   FIN CONFIGURACION AUTOMATICA   -->
 
 <template name="email">
@@ -1188,6 +1369,147 @@
   
   
        
+</template>
+
+<template name="general">
+  <div class="row">
+    <div class="col s12 m2">     
+      <ul id="nav-mobile" class="sidenav sidenav-fixed" style="transform: translateX(0px);">
+        <li class="no-padding">
+          <ul class="collapsible collapsible-accordion">            
+            <li class="bold zona" >
+              <a class="collapsible-header waves-effect waves-teal truncate" tabindex="0" href="/general/eventos">Eventos</a>
+            </li>
+            <li class="bold zona" >
+              <a class="collapsible-header waves-effect waves-teal truncate" tabindex="0" href="/general/humedad">Humedad</a>
+            </li>           
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+     <div class="col s12 m10">
+        
+          
+
+  <div class="container">
+    <div class="section">
+
+      {{> Template.dynamic template=general_plate}}
+
+        
+    </div>
+    <br><br>
+
+    
+      </div>
+
+    </div>
+
+
+
+  </div>
+
+</template>
+
+<template name="geneventos">
+
+  <h5> EVENTOS GENERAL</h5>
+
+
+
+
+
+
+
+            
+
+
+
+{{#if eventos.count}}
+  {{#each evento in eventos}}
+    {{#each e in evento.fecha}}
+      <table>
+        <thead>
+          <tr>
+              <th>Nombre Sensor</th>              
+              <th>Avg Total</th>
+              <th>Avg Hoy</th>
+              <th>Avg Semanal</th>
+              <th>Avg Mensual</th>
+              <th>Avg Anual</th>
+              
+              
+
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>Alvin</td>
+            
+          </tr>
+          
+        </tbody>
+      </table>
+  
+    {{/each}}
+  {{/each}}
+  {{else}}
+    <p>No hay Eventos Registrados</p>
+  {{/if}}
+  
+</template>
+
+<template name="genhumedad">
+
+    <DIV class="col s12">
+    <h5> HUMEDAD GENERAL</h5>
+
+    {{#if humedad.count}}
+
+    <!-- REVISAR ESTA TABLA -->
+
+      <table class="responsive-table">
+        <thead>
+          <tr>
+              <th>Nombre Sensor</th>              
+              <th>Avg Total</th>
+              <th>Avg Hoy</th>
+              <th>Avg Semanal</th>
+              <th>Avg Mensual</th>
+              <th>Avg Anual</th>
+              
+              
+
+          </tr>
+        </thead>
+
+
+     {{#each hum in humedad}}
+         
+          
+
+        <tbody>
+          <tr>
+            <td>{{hum.nombre}} / {{hum.zona}} </td>
+            <td>{{hum.avg_total}}</td>
+            <td>{{hum.avg_hoy}}</td>
+            <td>{{hum.avg_semana}}</td>
+            <td>{{hum.avg_mes}}</td>
+            <td>{{hum.avg_anno}}</td>
+          </tr>
+          
+        </tbody>
+      
+        
+      {{/each}}
+      </table>
+    {{else}}
+    <p>No hay Datos Registrados</p>
+  {{/if}}
+
+  </DIV>
 </template>
 
 
