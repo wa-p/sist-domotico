@@ -18,6 +18,31 @@
   </div-->
 
 <body>
+  
+    <script>
+      /* JS comes here */
+      askForApproval();
+      
+            function askForApproval() {
+                if(Notification.permission === "granted") {
+                    createNotification('Wow! This is great este es el otro caso?', 'created by @wa-p', 'https://www.studytonight.com/css/resource.v2/icons/studytonight/st-icon-dark.png');
+                }
+                else {
+                    Notification.requestPermission(permission => {
+                        if(permission === 'granted') {
+                            createNotification('Wow! que vaina es esta?!! This is great', 'created by @study.tonight', 'https://www.studytonight.com/css/resource.v2/icons/studytonight/st-icon-dark.png');
+                        }
+                    });
+                }
+            }
+            
+            function createNotification(title, text, icon) {
+                const noti = new Notification(title, {
+                    body: text,
+                    icon
+                });
+            }
+    </script>
 
 
 
@@ -67,7 +92,7 @@
             <li><a href="/">Controles <i class="material-icons">apps</i></a></li>
             {{#if admin currentUser._id}}
             <li><a href="#!" class="icono_seguridad">{{#if equals programas.estado "on" }}Seguridad activa{{else}}Seguridad Desactivada{{/if}}<i class="material-icons" id="icono_seguridad_m">{{#if equals programas.estado "on" }}lock{{else}}lock_open{{/if}}</i></a></li>
-            <li><a href="#">General <i class="material-icons">multiline_chart</i></a></li>
+            <li><a href="/general">General <i class="material-icons">multiline_chart</i></a></li>
             <li><a href="/config" id="configuracion">Configuración <i class="material-icons">settings</i></a></li>
             {{/if}}
 
@@ -129,7 +154,9 @@
     <div class="container">
       <div class="row">
         <div class="col s12">
-          <h5 class="white-text">Company Bio</h5>
+          <p class="white-text">Universidad Central de Venezuela</p>
+          <p class="white-text">Facultad de Ciencias</p>
+          <p class="white-text">Escuela de Computación</p>
           <p class="grey-text text-lighten-4">Sistema Domótico como TEG de la Escuela de Computación de Facultad de Ciencias - UCV</p>
 
 
@@ -201,6 +228,7 @@
                   
 
   </template>
+
 
 
 
@@ -364,7 +392,6 @@
   </style>
   
 </template>
-
 
 <template name="configuracion">
 
@@ -1277,7 +1304,7 @@
                     <p>Estatus</p>
                     <label>
                       Inactiva
-                      {{# if equals controltemp.estatus "inactiva"}}
+                      {{# if equals controltemp.estatus "off"}}
                       <input type="checkbox" data-id={{_id}}  class="switch controltemp-estatus" >
                       
                       {{else}}
@@ -1414,7 +1441,7 @@
 
 <template name="geneventos">
 
-  <h5> EVENTOS GENERAL</h5>
+  <h5 class="center-align"> EVENTOS GENERAL</h5>
 
 
 
@@ -1427,34 +1454,34 @@
 
 
 {{#if eventos.count}}
-  {{#each evento in eventos}}
-    {{#each e in evento.fecha}}
-      <table>
+<table class="centered highlight responsive-table">
         <thead>
           <tr>
-              <th>Nombre Sensor</th>              
-              <th>Avg Total</th>
-              <th>Avg Hoy</th>
-              <th>Avg Semanal</th>
-              <th>Avg Mensual</th>
-              <th>Avg Anual</th>
-              
+              <th>Tipo de Evento</th>              
+              <th>Zona</th>
+              <th>Fecha</th>
+                          
               
 
           </tr>
         </thead>
 
         <tbody>
+  {{#each evento in eventos}}
+    {{#each e in evento.fecha}}
+      
           <tr>
-            <td>Alvin</td>
-            
+            <td>{{evento.tipo}}</td>
+            <td>{{evento.zona}}</td>
+            <td>{{fecha_formato e.fecha}}</td>
           </tr>
           
-        </tbody>
-      </table>
+       
   
     {{/each}}
   {{/each}}
+   </tbody>
+      </table>
   {{else}}
     <p>No hay Eventos Registrados</p>
   {{/if}}
@@ -1464,13 +1491,13 @@
 <template name="genhumedad">
 
     <DIV class="col s12">
-    <h5> HUMEDAD GENERAL</h5>
+    <h5 class="center-align"> HUMEDAD GENERAL</h5>
 
     {{#if humedad.count}}
 
     <!-- REVISAR ESTA TABLA -->
 
-      <table class="responsive-table">
+      <table class="centered highlight responsive-table">
         <thead>
           <tr>
               <th>Nombre Sensor</th>              
@@ -1484,26 +1511,27 @@
 
           </tr>
         </thead>
-
+         <tbody>
 
      {{#each hum in humedad}}
          
           
 
-        <tbody>
+       
           <tr>
             <td>{{hum.nombre}} / {{hum.zona}} </td>
-            <td>{{hum.avg_total}}</td>
-            <td>{{hum.avg_hoy}}</td>
-            <td>{{hum.avg_semana}}</td>
-            <td>{{hum.avg_mes}}</td>
-            <td>{{hum.avg_anno}}</td>
+            <td>{{redondear hum.avg_total}}</td>
+            <td>{{redondear hum.avg_hoy}}</td>
+            <td>{{redondear hum.avg_semana}}</td>
+            <td>{{redondear hum.avg_mes}}</td>
+            <td>{{redondear hum.avg_anno}}</td>
           </tr>
           
-        </tbody>
+        
       
         
       {{/each}}
+      </tbody>
       </table>
     {{else}}
     <p>No hay Datos Registrados</p>

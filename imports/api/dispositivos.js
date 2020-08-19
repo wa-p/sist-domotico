@@ -23,7 +23,7 @@ if (Meteor.isServer) {
 
       Dispositivos.find({tipo:"sensor"}).forEach( function(dsp) { 
           //console.log("primer find")
-          //Historico.update({id:dsp._id,nombre:dsp.nombre,zona:dsp.zona,tipo:"sensor",especifico:dsp.especifico,pin:dsp.pin,icono:dsp.icono},{$push:{fecha:{fecha:dsp.update,valor:parseFloat(dsp.valor)}}},{upsert:true})
+          Historico.update({id:dsp._id,nombre:dsp.nombre,zona:dsp.zona,tipo:"sensor",especifico:dsp.especifico,pin:dsp.pin,icono:dsp.icono},{$push:{fecha:{fecha:dsp.update,valor:parseFloat(dsp.valor)}}},{upsert:true})
 
         Historico.find({nombre:dsp.nombre}).forEach(function(val){
           //console.log("segundo find")
@@ -80,7 +80,7 @@ if (Meteor.isServer) {
           
        
       //EQUIV A 1 HORA  3600000
-    }, 60000);
+    }, 600000);
   });
 
   // This code only runs on the server
@@ -90,6 +90,7 @@ if (Meteor.isServer) {
   client.subscribe('actuador');
   client.subscribe('sensor');
   client.subscribe('rutina');
+  client.subscribe('flame');
   client.subscribe('casa/#');
 
 
@@ -184,7 +185,7 @@ Meteor.publish('alertas', function alertasPublication() {
 
      Meteor.publish("eventos",function eventosPublication() {
     // body...
-    return Historico.find()
+    return Historico.find({});
   });
 
 
@@ -227,6 +228,9 @@ Meteor.publish('alertas', function alertasPublication() {
         cambiarValor:function(data) {
         	//console.log(data.message2);
             Dispositivos.update({_id:data.message1},{$set:{valor:data.message2,update:new Date()}});
+
+           
+
         }, 
 
 
@@ -325,7 +329,7 @@ Meteor.publish('alertas', function alertasPublication() {
                                    
                                  });
                   if (d.especifico=="air") {
-                    Dispositivos.update({"_id":air},{$set:{"tempactual":20,"controltemp.temperatura":20,"controltemp.estatus":"inactiva"}})
+                    Dispositivos.update({"_id":air},{$set:{"tempactual":20,"controltemp.temperatura":20,"controltemp.estatus":"off"}})
                   }
 
                   
@@ -570,7 +574,8 @@ pGQDNmwswkQXfpp63 hum
               Dispositivos.update({_id:d.id},{$inc:{"controltemp.temperatura":-1}});
           }
 
-          //FALTA ENVIAR MENSAJE MQTT
+          var dsp = Dispositivos.findOne({_id:d.id});
+          client.publish('casa/aire/auto',dsp.pin+' '+dsp.controltemp.estatus+' '+dsp.controltemp.temperatura);
 
         },
 
@@ -579,8 +584,11 @@ pGQDNmwswkQXfpp63 hum
         controltempestatus:function(d){
 
            Dispositivos.update({_id:d.id},{$set:{"controltemp.estatus":d.estado}});
-          // FALTA ENVIAR MENSAJE MQTT
           
+          
+          var dsp = Dispositivos.findOne({_id:d.id});
+          console.log(d)
+          client.publish('casa/aire/auto',dsp.pin+' '+dsp.controltemp.estatus+' '+dsp.controltemp.temperatura);
         },
 
         cambiarseguridad:function(d){
@@ -624,24 +632,25 @@ client.on('message', Meteor.bindEnvironment(function (topic, message) {
               if ( mensaje[1]=="alerta" && Programas.findOne({nombre:"seguridad",estado:"on"})) {
                 console.log("ALERTA DE INTRUSO")
                 Alerta.insert({tipo:"movimiento",activacion:new Date()});
-                Historico.update({tipo:"movimiento",zona:"zona_x"},{$push:{fecha:{fecha:new Date()}}},{upsert:true})
+                Historico.update({tipo:"movimiento",zona:Dispositivos.findOne({_id:mensaje[0]}).zona},{$push:{fecha:{fecha:new Date()}}},{upsert:true})
                 //Historico.insert({tipo:"movimiento",zona:"zona_x",fecha:new Date()});
+                //##### AQUI DECIA ZONA_X.. OJO
               }
               break;
 
-          case 'casa/flama':
+          case 'flame':
           //me avisa que hay flama pero no verifico la veracidad del valor del id
             console.log("ALERTA DE FLAMA")
             var mensaje = message.toString().split(" ");
             if(mensaje[1] == "on"){
               Meteor.call('cambiarValor', {'message1' : mensaje[0], 'message2' : mensaje[1]});
-              Alerta.insert({tipo:"flama",zona:Dispositivos.findOne({_id:mensaje[0]}).zona,activacion:new Date()});
+              Alerta.insert({tipo:"flama",zona:Dispositivos.findOne({_id:mensaje[0]}).zona,activacion:new Date(),sensor:mensaje[0]});
               Historico.update({tipo:"flama",zona:Dispositivos.findOne({_id:mensaje[0]}).zona},{$push:{fecha:{fecha:new Date()}}},{upsert:true})
 
               //Historico.insert({tipo:"flama",zona:Dispositivos.findOne({_id:mensaje[0]}).zona,fecha:new Date()});
             }else if( mensaje[1] == 'off'){
               Meteor.call('cambiarValor', {'message1' : mensaje[0], 'message2' : mensaje[1]});
-              Alerta.remove({tipo:"flama"});
+              Alerta.remove({sensor:mensaje[0]});
             }
             
             break;

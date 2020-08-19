@@ -15,6 +15,7 @@ import { Historico } from '../api/dispositivos.js';
 import './bodys.html';
 import '../../client/layouts/MainLayout.html';
 
+
 clientZona = new Mongo.Collection('clientZona');
 
 
@@ -25,6 +26,23 @@ clientZona = new Mongo.Collection('clientZona');
 
 // SENDER ID    1007820131851
 
+
+
+
+Template.registerHelper('equals',function(a, b){
+   return a == b;
+});
+
+Template.registerHelper('fecha_formato',function(f){
+   date = new Date(f);
+    return date.toLocaleString();
+});
+
+Template.registerHelper('redondear',function(f){
+    
+    return Math.round(f * 10) / 10
+
+});
 
 
 Template.body.onCreated(function bodyOnCreated() {
@@ -58,7 +76,8 @@ Tracker.autorun(function () {
           
           $( ".light-blue" ).removeClass( "light-blue" ).addClass( "red" );
                  
-          $('#modalwarning').modal('open');
+          //$('#modalwarning').modal('open');
+          Materialize.toast('Alerta de INTRUSO',6000,'rounded'); 
         }else{
 
           $( ".red" ).removeClass( "red " ).addClass( "light-blue" ); 
@@ -68,7 +87,7 @@ Tracker.autorun(function () {
         if (flama) {
           $('#fuego_'+flama.zona).addClass('blink');
           $('#fuego_'+flama.zona).css("display","inline");
-          Materialize.toast('Alerta de FLAMA en '+flama.zona); 
+          Materialize.toast('Alerta de FLAMA en '+flama.zona,6000,'rounded red'); 
 
         }else{
           $('.toast').hide();
@@ -97,9 +116,7 @@ Template.bodys.helpers({
 
   },
 
-  equals: function(a, b) {
-        return a == b;
-    },
+  
 
     alertas() {
     var notification = Alerta.findOne();
@@ -196,9 +213,7 @@ Template.principal.helpers({
   		//console.log(Permisos.find({usuario:Meteor.userId()}).fetch()[0].zona);
         return clientZona.find({_id: {$in: zonas}});
   },
-  equals: function(a, b) {
-        return a == b;
-    },
+  
     data: function() {
         var paramsStatus = Router.current().params._status;
         return paramsStatus;
@@ -507,9 +522,7 @@ Template.configdisp.helpers({
     	return clientZona.find();	
         },
 
-    equals: function(a, b) {
-        return a == b;
-    },
+    
 
     pin() {
     	return Pin.find();
@@ -617,9 +630,7 @@ Template.configdisp.events({
     	return clientZona.find();	
         },
 
-    equals: function(a, b) {
-        return a == b;
-    },
+    
     rutinas(){
     	return Rutinas.find();
     },
@@ -920,10 +931,7 @@ Template.configaires.helpers({
     return Dispositivos.find({'especifico':'air'})
   },
 
-   equals: function(a, b) {
-        return a == b;
-      }
-
+   
 });
 
 
@@ -939,9 +947,9 @@ Template.configaires.events({
 
   if (x==true) {
     //mensaje=event.target.id  + " on";
-    Meteor.call('controltempestatus', {'id' : id, 'estado' : 'activa'});
+    Meteor.call('controltempestatus', {'id' : id, 'estado' : 'on'});
   } else{
-    Meteor.call('controltempestatus', {'id' : id, 'estado' : 'inactiva'});
+    Meteor.call('controltempestatus', {'id' : id, 'estado' : 'off'});
   }
   //console.log(mensaje)
   //Dispositivos.update({"_id":id},{$set: {"estado":estado,"update":new Date()}});
@@ -967,13 +975,10 @@ Template.configaires.events({
 Template.geneventos.helpers({
 
   eventos(){
-    return  Historico.find({tipo:"flama"}); 
-  },
-
-  fecha(f){
-    date = new Date(f);
-    return date.toLocaleString();
+    return  Historico.find( { $or: [ { tipo: "flama" }, { tipo: "movimiento" } ] }); 
   }
+
+  
 
 });
 

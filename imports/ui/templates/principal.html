@@ -1,0 +1,159 @@
+<template name='principal'>
+
+  <style type="text/css">
+    
+    .blink {
+      animation: blink 2s steps(5, start) infinite;
+      -webkit-animation: blink 1s steps(5, start) infinite;
+    }
+    @keyframes blink {
+      to {
+        visibility: hidden;
+      }
+    }
+    @-webkit-keyframes blink {
+      to {
+        visibility: hidden;
+      }
+    }
+  </style>
+
+
+  <div class="row">
+      <div class="col s12 m2">
+        
+
+
+        <ul id="nav-mobile" class="sidenav sidenav-fixed" style="transform: translateX(0px);">
+      
+        <li class="no-padding">
+          <ul class="collapsible collapsible-accordion">
+            
+            {{#each zonas}}
+
+                <li class="bold zona" ><a class="collapsible-header waves-effect waves-teal truncate" tabindex="0" data-zona="{{_id}}">{{_id}}<i id="fuego_{{_id}}" class="big material-icons right fuego_icon" style="display: none; color:red">whatshot</i></a>
+                </li>
+
+            {{/each}}
+
+
+           
+           
+            
+           
+          </ul>
+        </li>
+       
+      </ul>
+
+
+
+
+
+      </div>
+      <div class="col s12 m10">
+        
+          
+
+  <div class="container">
+    <div class="section">
+
+      <!--   Icon Section   ->
+      <div class="row"-->
+       
+       {{#each dispositivos}}
+       
+             {{#if equals tipo "actuador"}}
+
+  <!-- actuador -->
+   <div class="col s12 m4">
+          <div class="icon-block">
+            <h2 class="center light-blue-text"><i class="medium material-icons">{{icono}}</i></h2>
+            <h5 class="center">{{nombre}} {{#if equals especifico "air"}} {{tempactual}} °C {{/if}}</h5>
+                <div class="switch center">
+                  <label>
+                    Off
+                    {{# if equals estado "off"}}
+                    <input type="checkbox" data-id={{pin}} data-zona={{zona}} class="switch" data-especifico={{especifico}} >
+                    {{else}}
+                    <input type="checkbox" data-id={{pin}} data-zona={{zona}}  checked class="switch" data-especifico={{especifico}}>
+                    {{/if}}
+                    <span class="lever"></span>
+                    On
+                  </label>
+                  <br>
+                  <br>
+                  {{# if equals especifico "air"}}
+                  <a class="btn-floating btn-small waves-effect waves-light light-blue"><i class="material-icons cambiar" data-id="{{_id}}" data-accion="bajar">remove</i></a>
+                    <a class="btn-floating btn-small waves-effect waves-light light-blue" ><i class="material-icons cambiar" data-id="{{_id}}" data-accion="subir">add</i></a>
+                    
+
+                    {{else}}
+
+                    <a class="btn-flat btn-small white"><i class="material-icons"></i></a>
+                    <a class="btn-flat btn-small white"><i class="material-icons"></i></a>
+
+                    {{/if}}
+                </div>
+            
+          </div>
+        </div>
+
+  <!-- sensor -->
+{{else}}
+   <div class="col s12 m4">
+          <div class="icon-block">
+            <h2 class="center light-blue-text"><i class=" medium material-icons" id="icono_{{_id}}">{{icono}}</i></h2>
+            <h5 class="center">{{nombre}} </h5>
+            <h5 class="center">  {{# if equals especifico "ldr"}}
+                                        {{# if equals valor "LOW.OSCURO"}} 
+                                            Muy oscuro 
+                                        {{/if}}
+                                        {{# if equals valor "HIGH.OSCURO"}} 
+                                            Oscuro
+                                        {{/if}}
+                                        {{# if equals valor "LOW.LUZ"}} 
+                                            Claro 
+                                        {{/if}} 
+                                        {{# if equals valor "HIGH.LUZ"}} 
+                                            Muy claro
+                                        {{/if}}      
+                                  {{else}} 
+                                        {{valor}} {{unidad}} 
+                                  {{/if}}</h5>
+            <br>
+            <br>
+            <a class="btn-flat btn-small white"><i class="material-icons"></i></a>
+            <a class="btn-flat btn-small white"><i class="material-icons"></i></a>
+           
+          </div>
+        </div>
+
+{{/if}}
+
+       {{/each}}      
+       
+
+        
+      <!--/div-->
+
+    </div>
+    <br><br>
+
+    
+      </div>
+
+    </div>
+
+  
+  </div>
+
+
+  <style type="text/css">
+    
+    .switch label input[type="checkbox"]:checked + .lever, .switch label input[type="checkbox"]:checked + .lever::after {
+        background-color: #ff9800 !important
+    }
+  </style>
+  
+</template>
