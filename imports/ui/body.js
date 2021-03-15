@@ -11,6 +11,7 @@ import { ReactiveDict } from 'meteor/reactive-dict';
 import { Session } from 'meteor/session';
 import { Alerta } from '../api/dispositivos.js';
 import { Historico } from '../api/dispositivos.js';
+import { Telegram } from '../api/dispositivos.js';
 //import { FlowRouter } from 'meteor/kadira:flow-router';
 import './bodys.html';
 import '../../client/layouts/MainLayout.html';
@@ -63,6 +64,7 @@ Template.body.onCreated(function bodyOnCreated() {
   Meteor.subscribe('programas');
   Meteor.subscribe('alertas');
   Meteor.subscribe('eventos');
+  Meteor.subscribe('telegram');
 
 
 });
@@ -78,6 +80,7 @@ Tracker.autorun(function () {
                  
           //$('#modalwarning').modal('open');
           Materialize.toast('Alerta de INTRUSO',6000,'rounded'); 
+          createNotification('ALERTA', 'INTRUSO!', 'https://www.studytonight.com/css/resource.v2/icons/studytonight/st-icon-dark.png');
         }else{
 
           $( ".red" ).removeClass( "red " ).addClass( "light-blue" ); 
@@ -88,6 +91,8 @@ Tracker.autorun(function () {
           $('#fuego_'+flama.zona).addClass('blink');
           $('#fuego_'+flama.zona).css("display","inline");
           Materialize.toast('Alerta de FLAMA en '+flama.zona,6000,'rounded red'); 
+
+          createNotification('ALERTA', 'FLAMA', 'https://www.studytonight.com/css/resource.v2/icons/studytonight/st-icon-dark.png');
 
         }else{
           $('.toast').hide();
@@ -704,7 +709,7 @@ Template.configdisp.events({
 		});
 
 		 		frecuencia = $.trim(frecuencia);
-		//DIAS SELECCIONADOS
+		//DISPOSITIVO SELECCIONADOS
 		 $("#new-auto input.dispositivo_auto:checkbox:checked").each(function() {
 		     
 		      dispositivos = dispositivos + $(this).attr("name") + " ";
@@ -830,8 +835,8 @@ Template.configdisp.events({
 
 		$('#edit_nombre_rutina').val(rutina.nombre);
 		$('#edit_nombre_rutina').siblings('label, .prefix').addClass('active');
-		$('#edit_fecha_inicio').val(rutina.fecha_inicio);
-		$('#edit_fecha_fin').val(rutina.fecha_fin);
+		//$('#edit_fecha_inicio').val(rutina.fecha_inicio);
+		//$('#edit_fecha_fin').val(rutina.fecha_fin);
 		$('#edit_hora_encendido').val(rutina.hora_encendido);
 		$('#edit_hora_apagado').val(rutina.hora_apagado);
 		
@@ -1004,4 +1009,65 @@ Template.genhumedad.helpers({
     return date.toLocaleString();
   }
 
+});
+
+
+/*Template.registro.onCreated(function bodyOnCreated() {
+    let codigo = FlowRouter.getParam('id');
+    let existe = Telegram.findOne({codigo:codigo});
+    let exist = existe.uso;
+      if (exist == 0) {
+        //Modificar DB y hacer Inserts definitivos
+        //Meteor.call('registrotelegram',{'codigo':codigo});
+        Session.set('valido',true);
+      }else{
+        Session.set('valido',false);}
+
+  
+
+}*/
+
+
+/*Template.registro.events({
+'onpageshow #registro':function(event){
+  setTimeout(
+        function() 
+        {  
+          var codigo = FlowRouter.getParam('id');
+          var existe = Telegram.findOne({codigo:codigo});
+          const exist = existe.uso;
+          Meteor.call('registrotelegram',{'codigo':codigo});
+          alert("entramos")
+          //window.location.pathname = '/'
+          console.log("entreee")
+        }, 3000);
+}
+
+})*/
+
+Template.registro.helpers({
+  telegram(){
+    return Telegram.find({});
+  },
+
+  //REVISAR ESTA FUNCION.. AL HACER EL CALL SE VUELVE A EVALUAR, POR LO QUE SE GENERA UN CICLO INFINITO
+  estado(){
+    var codigo = FlowRouter.getParam('id');
+    var existe = Telegram.findOne({codigo:codigo});
+    const exist = existe.uso;
+    var bool= false;
+    
+      if (exist == 0) {
+        //Modificar DB y hacer Inserts definitivos
+        Meteor.call('registrotelegram',{'codigo':codigo,'correo':existe.correo,'telegram':existe.id_telegram});
+        bool = true;
+      }else if(exist==1){
+        bool = true;
+      }else{
+        bool = false}
+     
+      
+      return bool;
+
+  }
 });

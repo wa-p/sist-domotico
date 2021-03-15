@@ -25,12 +25,12 @@
       
             function askForApproval() {
                 if(Notification.permission === "granted") {
-                    createNotification('Wow! This is great este es el otro caso?', 'created by @wa-p', 'https://www.studytonight.com/css/resource.v2/icons/studytonight/st-icon-dark.png');
+                    
                 }
                 else {
                     Notification.requestPermission(permission => {
                         if(permission === 'granted') {
-                            createNotification('Wow! que vaina es esta?!! This is great', 'created by @study.tonight', 'https://www.studytonight.com/css/resource.v2/icons/studytonight/st-icon-dark.png');
+                            createNotification('Necesitamos permisos para notificarte!', 'created by @Domus', 'https://www.studytonight.com/css/resource.v2/icons/studytonight/st-icon-dark.png');
                         }
                     });
                 }
@@ -42,6 +42,8 @@
                     icon
                 });
             }
+
+
     </script>
 
 
@@ -67,8 +69,8 @@
   <nav class="lighten-1 light-blue">
     <div class="nav-wrappera">
       <a href="#!" class="brand-logo">Domus <i class="material-icons">blur_on</i></a>
-       <a href="#" data-activates="slide-out" class="button-collapse hide-on-med-and-up"><i class="material-icons">menu</i></a>
-         <ul  class="right hide-on-small-only">
+       <a href="#" data-activates="slide-out" class="button-collapse hide-on-large-only"><i class="material-icons">menu</i></a>
+         <ul  class="right hide-on-med-and-down">
           {{#if currentUser}}
             <li><a href="/">Controles</a></li>
             {{#if admin currentUser._id}}
@@ -1164,32 +1166,32 @@
                            
 
 
-                          <input type="checkbox" class="filled-in dia" name="lunes" value="1" id="lunes" />
-                          <label for="lunes">lun</label>
+                          <input type="checkbox" class="filled-in dia" name="lunes" value="1" id="edit_lunes" />
+                          <label for="edit_lunes">lun</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="martes" value="2" id="martes"/>
-                          <label for="martes">mar</label>
+                          <input type="checkbox" class="filled-in dia" name="martes" value="2" id="edit_martes"/>
+                          <label for="edit_martes">mar</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="miercoles" value="3" id="miercoles"/>
-                          <label for="miercoles">mie</label>
+                          <input type="checkbox" class="filled-in dia" name="miercoles" value="3" id="edit_miercoles"/>
+                          <label for="edit_miercoles">mie</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="jueves" value="4" id="jueves"/>
-                          <label for="jueves">jue</label>
+                          <input type="checkbox" class="filled-in dia" name="jueves" value="4" id="edit_jueves"/>
+                          <label for="edit_jueves">jue</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="viernes" value="5" id="viernes"/>
-                          <label for="viernes">vie</label>
+                          <input type="checkbox" class="filled-in dia" name="viernes" value="5" id="edit_viernes"/>
+                          <label for="edit_viernes">vie</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="sabado" value="6" id="sabado"/>
-                          <label for="sabado">sab</label>
+                          <input type="checkbox" class="filled-in dia" name="sabado" value="6" id="edit_sabado"/>
+                          <label for="edit_sabado">sab</label>
                           </div>
                           <div class="col s5 l2" >
-                          <input type="checkbox" class="filled-in dia" name="domingo" value="7" id="domingo"/>
-                          <label for="domingo">dom</label>
+                          <input type="checkbox" class="filled-in dia" name="domingo" value="7" id="edit_domingo"/>
+                          <label for="edit_domingo">dom</label>
 
 
                              
@@ -1539,6 +1541,22 @@
 
   </DIV>
 </template>
+
+
+<template name="registro">
+  
+  <div id="registro">
+   {{#if estado}}
+      <h2 class="center">Su cuenta de Telegram ha sido registrada, ahora recibirá alertas por allí</h2>
+   {{else}}
+      <h2 class="center">Enlace no válido</h2>
+   {{/if}}
+
+   
+  </div>
+
+</template>
+
 
 
 <template name="file">

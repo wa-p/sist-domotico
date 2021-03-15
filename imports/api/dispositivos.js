@@ -1,6 +1,8 @@
 import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
 import { ReactiveAggregate } from 'meteor/jcbernack:reactive-aggregate';
+import { Email } from 'meteor/email'
+import { Accounts } from 'meteor/accounts-base'
 
 export const Dispositivos = new Mongo.Collection('dispositivos');
 export const Permisos = new Mongo.Collection('permisos');
@@ -12,8 +14,17 @@ export const Programas = new Mongo.Collection('programas');
 export const Historico = new Mongo.Collection('historico');
 Contador = new Mongo.Collection('contadorDispositivo');
 export const Alerta = new Mongo.Collection('alerta');
+export const Telegram = new Mongo.Collection('telegram');
 
 if (Meteor.isServer) {
+
+const TelegramBot = require('node-telegram-bot-api')
+
+const token = '1590371037:AAG7R_-Z3ca3Qa97Xgz-MIjKAUoRiNqPK00'
+
+const bot = new TelegramBot(token, { polling: true })
+
+
 
   //INTERVALO CADA HORA (3600000) PARA ACTUALIZAR LOS REGISTROS Y LOS PROMEDIOS
   Meteor.startup(function () {
@@ -92,6 +103,8 @@ if (Meteor.isServer) {
   client.subscribe('rutina');
   client.subscribe('flame');
   client.subscribe('casa/#');
+  client.subscribe('registro');
+  client.subscribe('telegram/#');
 
 
 
@@ -188,6 +201,11 @@ Meteor.publish('alertas', function alertasPublication() {
     return Historico.find({});
   });
 
+     Meteor.publish("telegram",function telegramPublication() {
+    // body...
+    return Telegram.find();
+  });
+
 
    Meteor.methods({
 
@@ -205,6 +223,7 @@ Meteor.publish('alertas', function alertasPublication() {
               client.publish('casa/air', m );   
             }else {
               client.publish('casa/leds', m );
+
             }
            
             //casa/actuador <data.ide> <data.estado> (encender o apagar)
@@ -482,7 +501,7 @@ pGQDNmwswkQXfpp63 hum
                           frecuencia:d.frecuencia.split(" "),
                           dispositivos:d.dispositivos.split(" ")
                   }});
-          console.log(d.frecuencia.split(" "));
+          //console.log(d.frecuencia.split(" "));
 
           //console.log("zona a eliminar: "+a);
           //var dsp = Dispositivos.findOne({_id:d.id})
@@ -509,7 +528,7 @@ pGQDNmwswkQXfpp63 hum
           Rutinas.update({_id:d.id},{$set:{estatus:d.estado}});
           // ENVIAR MENSAJE MQTT
           // client.publish('casa/leds',"ledcuarton");  
-          console.log(d.frecuencia.split(" "));
+          //console.log(d.frecuencia.split(" "));
 
         },
 
@@ -518,9 +537,9 @@ pGQDNmwswkQXfpp63 hum
         cambiaractuador:function(data) {
           //console.log(data.message2);
             //Dispositivos.update({pin:data.message1},{$set:{estado:data.message2,update:new Date()}});
-            console.log(Dispositivos.findOne({_id:data.message1}).estado)
+            //console.log(Dispositivos.findOne({_id:data.message1}).estado)
              Dispositivos.update({_id:data.message1},{$set:{estado:data.message2,update:new Date()}});
-             console.log(Dispositivos.findOne({_id:data.message1}).estado)
+             //console.log(Dispositivos.findOne({_id:data.message1}).estado)
         }, 
 
 
@@ -605,6 +624,14 @@ pGQDNmwswkQXfpp63 hum
               client.publish('casa/seguridad',"20 off");
               Alerta.remove({tipo:"movimiento"});
           }
+        },
+
+        registrotelegram:function(d){
+          Telegram.update({codigo:d.codigo},{$inc:{uso:1}});
+          //para quitar el campo usar $unset
+          Meteor.users.update({ "emails.address" : d.correo},{$set:{"profile.telegram":d.telegram}});
+          //enviar mqtt indicando el registro exitoso via el bot de telegram
+          client.publish('telegram/exito', d.telegram );
         }
 
 
@@ -655,6 +682,20 @@ client.on('message', Meteor.bindEnvironment(function (topic, message) {
             
             break;
 
+          case 'registro':
+            console.log("Registro");
+            let code = Math.random().toString(36).slice(3);
+            mensaje = message.toString().split(" ");
+            /*
+              debo recibir el id de telegram, y el correo
+              enviar el correo de confirmacion y registrar estos datos en la base de datos (datos temporales)
+              el entrar al enlace, con el numero de confirmacion, se registra la informacion en la base de datos
+            */
+            Telegram.insert({id_telegram:mensaje[0],correo:mensaje[1],codigo:code,uso:0});
+
+            Email.send({ to:"wa_p@hotmail.com", from:"jesus.r.montoya@gmail.com", subject:"test", text:"test text with a link http://www.domus.com/"+code });
+            break;
+
           default:
             console.log("entre en el caso default")
         } 
@@ -662,6 +703,40 @@ client.on('message', Meteor.bindEnvironment(function (topic, message) {
   		//zvD5GuNE2539osYNE sensor llama
 
 }));
+
+
+
+
+
+
+bot.onText(/\/start/, (msg, match) => {
+
+  const chatId = msg.chat.id
+  const resp = match[1]
+  //bot.replyTo(msg.chat,resp);
+  //console.log(msg)
+  //bot.onReplyToMessage(chatId, msg.message_id, bot.sendMessage(chatId, "Bienvenido a Domusss. \n Escriba su correo para iniciar el registro:")); 
+  bot.sendMessage(chatId, "Bienvenido a Domus. \n Escriba su correo para iniciar el registro:",{"reply_to_message_id":msg.message_id,reply_markup: JSON.stringify({ force_reply: true })})
+
+})
+
+
+bot.onText(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/, (msg, match) => {
+
+  const chatId = msg.chat.id
+  //const resp = match[1]
+  //bot.replyTo(msg.chat,resp);
+  bot.sendMessage(chatId, "Le hemos enviado un enlace de confirmación a su correo",{"reply_to_message_id":msg.message_id})
+})
+
+/*bot.on('message', (msg) => {
+  const chatId = msg.chat.id;
+
+  // send a message to the chat acknowledging receipt of their message
+  bot.sendMessage(chatId, 'Received your message');
+});*/
+
+
 
 function getNextID(sec){
 
